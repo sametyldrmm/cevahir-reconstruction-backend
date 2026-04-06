@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{title}}</title>
+</head>
+<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
+  <div style="background-color: #ffffff; border-radius: 8px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h2 style="color: #333; margin-bottom: 20px;">{{title}}</h2>
+    <p>Dear {{username}},</p>
+    <p style="white-space: pre-line; line-height: 1.5;">{{message}}</p>
+    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e9ecef;">
+      <p style="color: #666; font-size: 14px;">Best regards,<br />CPM Daily Targets Tracking System</p>
+      <p style="color: #666; font-size: 12px; margin-top: 20px;">
+        This email was sent from {{SMTP_FROM}}.<br />
+        If you don't want to receive emails, <a href="mailto:{{SMTP_FROM}}?subject=unsubscribe" style="color: #666;">click here</a>.
+      </p>
+    </div>
+  </div>
+</body>
+</html>

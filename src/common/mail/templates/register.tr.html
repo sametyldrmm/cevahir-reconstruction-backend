@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CevahirCPM - Hesap Doğrulama Kodu</title>
+</head>
+<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
+  <div style="background-color: #ffffff; border-radius: 8px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h2 style="color: #333; margin-bottom: 20px;">Hesap Doğrulama Kodu</h2>
+    <p>Sayın {{username}},</p>
+    <p>CevahirCPM hesabınız için doğrulama kodunuz aşağıdadır:</p>
+    <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #e9ecef; text-align: center;">
+      <h1 style="color: #d9ff00; font-size: 32px; margin: 0; letter-spacing: 8px; font-weight: bold;">{{verificationCode}}</h1>
+      <p style="color: #666; font-size: 14px; margin: 10px 0 0 0;">Bu kod 10 dakika geçerlidir</p>
+    </div>
+    <p style="color: #666; font-size: 14px;">
+      <strong>Güvenlik Uyarısı:</strong><br />
+      • Bu kodu kimseyle paylaşmayın<br />
+      • CevahirCPM ekibi sizden asla bu kodu istemez<br />
+      • Şüpheli bir durum fark ederseniz hemen bizimle iletişime geçin
+    </p>
+    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e9ecef;">
+      <p style="color: #666; font-size: 14px;">Saygılarımızla,<br />CevahirCPM Ekibi</p>
+      <p style="color: #666; font-size: 12px; margin-top: 20px;">
+        Bu e-posta {{SMTP_FROM}} adresinden gönderilmiştir.<br />
+        E-posta almak istemiyorsanız <a href="mailto:{{SMTP_FROM}}?subject=unsubscribe" style="color: #666;">buraya tıklayın</a>.
+      </p>
+    </div>
+  </div>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
