@@ -1,0 +1,1213 @@
+{
+  "required": {
+    "A": {
+      "total_all_elements": 7887,
+      "concrete_m3": 53312.74,
+      "steel_kg": 6899887.6,
+      "steel_ton": 6899.89,
+      "pile_concrete_m3": 12493.29,
+      "by_type": {
+        "IfcSlab": {
+          "count": 3944,
+          "concrete_m3": 64028.14,
+          "steel_kg": 7409408.59,
+          "steel_ton": 7409.41
+        },
+        "IfcColumn": {
+          "count": 2210,
+          "concrete_m3": 10682.67,
+          "steel_kg": 1523173.71,
+          "steel_ton": 1523.17
+        },
+        "IfcBeam": {
+          "count": 6144,
+          "concrete_m3": 16828.75,
+          "steel_kg": 2716188.54,
+          "steel_ton": 2716.19
+        },
+        "IfcWallStandardCase": {
+          "count": 806,
+          "concrete_m3": 15085.92,
+          "steel_kg": 2151004.36,
+          "steel_ton": 2151.0
+        }
+      }
+    },
+    "B": {
+      "total_all_elements": 6802,
+      "concrete_m3": 42406.6,
+      "steel_kg": 5411212.87,
+      "steel_ton": 5411.21,
+      "pile_concrete_m3": 6440.41,
+      "by_type": {
+        "IfcColumn": {
+          "count": 2810,
+          "concrete_m3": 11015.03,
+          "steel_kg": 1570563.21,
+          "steel_ton": 1570.56
+        },
+        "IfcSlab": {
+          "count": 2608,
+          "concrete_m3": 55284.24,
+          "steel_kg": 6397554.67,
+          "steel_ton": 6397.55
+        },
+        "IfcBeam": {
+          "count": 4830,
+          "concrete_m3": 11399.96,
+          "steel_kg": 1839973.23,
+          "steel_ton": 1839.97
+        },
+        "IfcWallStandardCase": {
+          "count": 594,
+          "concrete_m3": 7113.96,
+          "steel_kg": 1014334.65,
+          "steel_ton": 1014.33
+        }
+      }
+    },
+    "C1": {
+      "total_all_elements": 2286,
+      "concrete_m3": 17172.52,
+      "steel_kg": 2195296.38,
+      "steel_ton": 2195.3,
+      "pile_concrete_m3": 3436.6,
+      "by_type": {
+        "IfcBeam": {
+          "count": 1926,
+          "concrete_m3": 5804.8,
+          "steel_kg": 936904.47,
+          "steel_ton": 936.9
+        },
+        "IfcSlab": {
+          "count": 1260,
+          "concrete_m3": 22919.82,
+          "steel_kg": 2652307.1,
+          "steel_ton": 2652.31
+        },
+        "IfcWallStandardCase": {
+          "count": 502,
+          "concrete_m3": 5586.56,
+          "steel_kg": 796551.25,
+          "steel_ton": 796.55
+        },
+        "IfcColumn": {
+          "count": 30,
+          "concrete_m3": 33.87,
+          "steel_kg": 4829.95,
+          "steel_ton": 4.83
+        }
+      }
+    },
+    "C2": {
+      "total_all_elements": 2598,
+      "concrete_m3": 18585.99,
+      "steel_kg": 2398979.52,
+      "steel_ton": 2398.98,
+      "pile_concrete_m3": 1424.5,
+      "by_type": {
+        "IfcBeam": {
+          "count": 1826,
+          "concrete_m3": 5649.71,
+          "steel_kg": 911872.92,
+          "steel_ton": 911.87
+        },
+        "IfcSlab": {
+          "count": 1148,
+          "concrete_m3": 22651.45,
+          "steel_kg": 2621250.9,
+          "steel_ton": 2621.25
+        },
+        "IfcColumn": {
+          "count": 822,
+          "concrete_m3": 2734.6,
+          "steel_kg": 389909.75,
+          "steel_ton": 389.91
+        },
+        "IfcWallStandardCase": {
+          "count": 528,
+          "concrete_m3": 6136.23,
+          "steel_kg": 874925.47,
+          "steel_ton": 874.93
+        }
+      }
+    },
+    "C3": {
+      "total_all_elements": 2650,
+      "concrete_m3": 18953.46,
+      "steel_kg": 2446706.66,
+      "steel_ton": 2446.71,
+      "pile_concrete_m3": 1424.5,
+      "by_type": {
+        "IfcWallStandardCase": {
+          "count": 496,
+          "concrete_m3": 6457.89,
+          "steel_kg": 920789.39,
+          "steel_ton": 920.79
+        },
+        "IfcColumn": {
+          "count": 812,
+          "concrete_m3": 2706.24,
+          "steel_kg": 385865.79,
+          "steel_ton": 385.87
+        },
+        "IfcBeam": {
+          "count": 1880,
+          "concrete_m3": 5705.05,
+          "steel_kg": 920804.3,
+          "steel_ton": 920.8
+        },
+        "IfcSlab": {
+          "count": 1240,
+          "concrete_m3": 23037.75,
+          "steel_kg": 2665953.84,
+          "steel_ton": 2665.95
+        }
+      }
+    },
+    "C4": {
+      "total_all_elements": 2828,
+      "concrete_m3": 18685.88,
+      "steel_kg": 2409338.71,
+      "steel_ton": 2409.34,
+      "pile_concrete_m3": 2389.58,
+      "by_type": {
+        "IfcWallStandardCase": {
+          "count": 672,
+          "concrete_m3": 5759.97,
+          "steel_kg": 821277.19,
+          "steel_ton": 821.28
+        },
+        "IfcSlab": {
+          "count": 1304,
+          "concrete_m3": 23028.89,
+          "steel_kg": 2664928.85,
+          "steel_ton": 2664.93
+        },
+        "IfcBeam": {
+          "count": 1918,
+          "concrete_m3": 5775.83,
+          "steel_kg": 932229.16,
+          "steel_ton": 932.23
+        },
+        "IfcColumn": {
+          "count": 846,
+          "concrete_m3": 2807.07,
+          "steel_kg": 400242.22,
+          "steel_ton": 400.24
+        }
+      }
+    },
+    "D1": {
+      "total_all_elements": 5431,
+      "concrete_m3": 39022.18,
+      "steel_kg": 5038746.28,
+      "steel_ton": 5038.75,
+      "pile_concrete_m3": 5297.36,
+      "by_type": {
+        "IfcBeam": {
+          "count": 3884,
+          "concrete_m3": 10654.53,
+          "steel_kg": 1719659.46,
+          "steel_ton": 1719.66
+        },
+        "IfcSlab": {
+          "count": 2546,
+          "concrete_m3": 46564.99,
+          "steel_kg": 5388552.9,
+          "steel_ton": 5388.55
+        },
+        "IfcWallStandardCase": {
+          "count": 1068,
+          "concrete_m3": 14615.02,
+          "steel_kg": 2083862.35,
+          "steel_ton": 2083.86
+        },
+        "IfcColumn": {
+          "count": 1620,
+          "concrete_m3": 6202.71,
+          "steel_kg": 884404.58,
+          "steel_ton": 884.4
+        },
+        "IfcWall": {
+          "count": 2,
+          "concrete_m3": 7.11,
+          "steel_kg": 1013.27,
+          "steel_ton": 1.01
+        }
+      }
+    },
+    "D2": {
+      "total_all_elements": 5499,
+      "concrete_m3": 39098.1,
+      "steel_kg": 5049498.65,
+      "steel_ton": 5049.5,
+      "pile_concrete_m3": 5297.36,
+      "by_type": {
+        "IfcWallStandardCase": {
+          "count": 1102,
+          "concrete_m3": 14683.87,
+          "steel_kg": 2093679.7,
+          "steel_ton": 2093.68
+        },
+        "IfcSlab": {
+          "count": 2616,
+          "concrete_m3": 46605.2,
+          "steel_kg": 5393205.96,
+          "steel_ton": 5393.21
+        },
+        "IfcBeam": {
+          "count": 3918,
+          "concrete_m3": 10704.22,
+          "steel_kg": 1727678.33,
+          "steel_ton": 1727.68
+        },
+        "IfcColumn": {
+          "count": 1620,
+          "concrete_m3": 6202.91,
+          "steel_kg": 884433.3,
+          "steel_ton": 884.43
+        }
+      }
+    },
+    "E1": {
+      "total_all_elements": 3878,
+      "concrete_m3": 30797.2,
+      "steel_kg": 3977541.25,
+      "steel_ton": 3977.54,
+      "pile_concrete_m3": 3496.41,
+      "by_type": {
+        "IfcSlab": {
+          "count": 1504,
+          "concrete_m3": 36832.02,
+          "steel_kg": 4262242.31,
+          "steel_ton": 4262.24
+        },
+        "IfcBeam": {
+          "count": 2990,
+          "concrete_m3": 8615.58,
+          "steel_kg": 1390569.25,
+          "steel_ton": 1390.57
+        },
+        "IfcWallStandardCase": {
+          "count": 458,
+          "concrete_m3": 7901.27,
+          "steel_kg": 1126591.8,
+          "steel_ton": 1126.59
+        },
+        "IfcColumn": {
+          "count": 1452,
+          "concrete_m3": 8245.54,
+          "steel_kg": 1175679.15,
+          "steel_ton": 1175.68
+        }
+      }
+    },
+    "E2": {
+      "total_all_elements": 3891,
+      "concrete_m3": 31220.84,
+      "steel_kg": 4036399.51,
+      "steel_ton": 4036.4,
+      "pile_concrete_m3": 2696.91,
+      "by_type": {
+        "IfcSlab": {
+          "count": 1498,
+          "concrete_m3": 37038.84,
+          "steel_kg": 4286175.76,
+          "steel_ton": 4286.18
+        },
+        "IfcBeam": {
+          "count": 3024,
+          "concrete_m3": 8746.62,
+          "steel_kg": 1411718.96,
+          "steel_ton": 1411.72
+        },
+        "IfcWallStandardCase": {
+          "count": 470,
+          "concrete_m3": 8426.09,
+          "steel_kg": 1201422.37,
+          "steel_ton": 1201.42
+        },
+        "IfcColumn": {
+          "count": 1448,
+          "concrete_m3": 8230.13,
+          "steel_kg": 1173481.93,
+          "steel_ton": 1173.48
+        }
+      }
+    },
+    "O1": {
+      "total_all_elements": 487,
+      "concrete_m3": 5001.5,
+      "steel_kg": 603641.56,
+      "steel_ton": 603.64,
+      "pile_concrete_m3": 659.22,
+      "by_type": {
+        "IfcBeam": {
+          "count": 242,
+          "concrete_m3": 607.68,
+          "steel_kg": 98081.28,
+          "steel_ton": 98.08
+        },
+        "IfcSlab": {
+          "count": 252,
+          "concrete_m3": 8577.67,
+          "steel_kg": 992617.34,
+          "steel_ton": 992.62
+        },
+        "IfcColumn": {
+          "count": 60,
+          "concrete_m3": 205.5,
+          "steel_kg": 29300.48,
+          "steel_ton": 29.3
+        },
+        "IfcWallStandardCase": {
+          "count": 84,
+          "concrete_m3": 612.16,
+          "steel_kg": 87284.03,
+          "steel_ton": 87.28
+        }
+      }
+    },
+    "O2": {
+      "total_all_elements": 1142,
+      "concrete_m3": 10294.65,
+      "steel_kg": 1253525.23,
+      "steel_ton": 1253.53,
+      "pile_concrete_m3": 1010.07,
+      "by_type": {
+        "IfcWallStandardCase": {
+          "count": 204,
+          "concrete_m3": 639.86,
+          "steel_kg": 91233.78,
+          "steel_ton": 91.23
+        },
+        "IfcSlab": {
+          "count": 564,
+          "concrete_m3": 17266.53,
+          "steel_kg": 1998102.5,
+          "steel_ton": 1998.1
+        },
+        "IfcBeam": {
+          "count": 716,
+          "concrete_m3": 1869.21,
+          "steel_kg": 301693.83,
+          "steel_ton": 301.69
+        },
+        "IfcColumn": {
+          "count": 208,
+          "concrete_m3": 813.7,
+          "steel_kg": 116020.34,
+          "steel_ton": 116.02
+        }
+      }
+    },
+    "O3": {
+      "total_all_elements": 1141,
+      "concrete_m3": 10294.71,
+      "steel_kg": 1253533.63,
+      "steel_ton": 1253.53,
+      "pile_concrete_m3": 1068.88,
+      "by_type": {
+        "IfcSlab": {
+          "count": 564,
+          "concrete_m3": 17266.53,
+          "steel_kg": 1998102.5,
+          "steel_ton": 1998.1
+        },
+        "IfcBeam": {
+          "count": 716,
+          "concrete_m3": 1869.21,
+          "steel_kg": 301693.83,
+          "steel_ton": 301.69
+        },
+        "IfcColumn": {
+          "count": 208,
+          "concrete_m3": 813.82,
+          "steel_kg": 116037.14,
+          "steel_ton": 116.04
+        },
+        "IfcWallStandardCase": {
+          "count": 204,
+          "concrete_m3": 639.86,
+          "steel_kg": 91233.78,
+          "steel_ton": 91.23
+        }
+      }
+    },
+    "O4": {
+      "total_all_elements": 479,
+      "concrete_m3": 4997.86,
+      "steel_kg": 603220.17,
+      "steel_ton": 603.22,
+      "pile_concrete_m3": 730.35,
+      "by_type": {
+        "IfcBeam": {
+          "count": 242,
+          "concrete_m3": 607.68,
+          "steel_kg": 98081.28,
+          "steel_ton": 98.08
+        },
+        "IfcSlab": {
+          "count": 252,
+          "concrete_m3": 8570.38,
+          "steel_kg": 991774.54,
+          "steel_ton": 991.77
+        },
+        "IfcColumn": {
+          "count": 60,
+          "concrete_m3": 205.5,
+          "steel_kg": 29300.48,
+          "steel_ton": 29.3
+        },
+        "IfcWallStandardCase": {
+          "count": 84,
+          "concrete_m3": 612.16,
+          "steel_kg": 87284.03,
+          "steel_ton": 87.28
+        }
+      }
+    },
+    "T": {
+      "total_all_elements": 1652,
+      "concrete_m3": 27229.52,
+      "steel_kg": 3336870.68,
+      "steel_ton": 3336.87,
+      "pile_concrete_m3": 0.0,
+      "by_type": {
+        "IfcBeam": {
+          "count": 1430,
+          "concrete_m3": 4105.63,
+          "steel_kg": 662655.57,
+          "steel_ton": 662.66
+        },
+        "IfcColumn": {
+          "count": 808,
+          "concrete_m3": 2760.62,
+          "steel_kg": 393619.28,
+          "steel_ton": 393.62
+        },
+        "IfcSlab": {
+          "count": 866,
+          "concrete_m3": 43498.82,
+          "steel_kg": 5033732.03,
+          "steel_ton": 5033.73
+        },
+        "IfcWallStandardCase": {
+          "count": 200,
+          "concrete_m3": 4093.98,
+          "steel_kg": 583734.48,
+          "steel_ton": 583.73
+        }
+      }
+    },
+    "U": {
+      "total_all_elements": 4527,
+      "concrete_m3": 18874.46,
+      "steel_kg": 3134945.7,
+      "steel_ton": 3134.95,
+      "pile_concrete_m3": 0.0,
+      "by_type": {
+        "IfcOpeningElement": {
+          "count": 3536,
+          "concrete_m3": 14690.97,
+          "steel_kg": 3015009.48,
+          "steel_ton": 3015.01
+        },
+        "IfcStairFlight": {
+          "count": 698,
+          "concrete_m3": 968.44,
+          "steel_kg": 198751.19,
+          "steel_ton": 198.75
+        },
+        "IfcWallStandardCase": {
+          "count": 1278,
+          "concrete_m3": 6663.31,
+          "steel_kg": 950078.93,
+          "steel_ton": 950.08
+        },
+        "IfcBuildingElementProxy": {
+          "count": 1834,
+          "concrete_m3": 2629.71,
+          "steel_kg": 539691.12,
+          "steel_ton": 539.69
+        },
+        "IfcColumn": {
+          "count": 474,
+          "concrete_m3": 2232.48,
+          "steel_kg": 318315.55,
+          "steel_ton": 318.32
+        },
+        "IfcSlab": {
+          "count": 1010,
+          "concrete_m3": 9916.99,
+          "steel_kg": 1147604.96,
+          "steel_ton": 1147.6
+        },
+        "IfcBeam": {
+          "count": 212,
+          "concrete_m3": 435.01,
+          "steel_kg": 70210.92,
+          "steel_ton": 70.21
+        },
+        "IfcWall": {
+          "count": 12,
+          "concrete_m3": 212.01,
+          "steel_kg": 30229.25,
+          "steel_ton": 30.23
+        }
+      }
+    }
+  },
+  "built": {
+    "A": {
+      "total_all_elements": 618,
+      "concrete_m3": 5877.35,
+      "steel_kg": 699098.14,
+      "steel_ton": 699.1,
+      "pile_count": 1335,
+      "pile_concrete_m3": 12493.29,
+      "by_type": {
+        "IfcColumn": {
+          "count": 197,
+          "concrete_m3": 238.51,
+          "steel_kg": 34006.92,
+          "steel_ton": 34.01
+        },
+        "IfcWallStandardCase": {
+          "count": 155,
+          "concrete_m3": 380.59,
+          "steel_kg": 54266.34,
+          "steel_ton": 54.27
+        },
+        "IfcSlab": {
+          "count": 169,
+          "concrete_m3": 5207.17,
+          "steel_kg": 602579.4,
+          "steel_ton": 602.58
+        },
+        "IfcBeam": {
+          "count": 97,
+          "concrete_m3": 51.09,
+          "steel_kg": 8245.48,
+          "steel_ton": 8.25
+        }
+      }
+    },
+    "B": {
+      "total_all_elements": 278,
+      "concrete_m3": 6455.12,
+      "steel_kg": 755221.9,
+      "steel_ton": 755.22,
+      "pile_count": 1381,
+      "pile_concrete_m3": 6440.41,
+      "by_type": {
+        "IfcWallStandardCase": {
+          "count": 20,
+          "concrete_m3": 19.28,
+          "steel_kg": 2749.68,
+          "steel_ton": 2.75
+        },
+        "IfcSlab": {
+          "count": 44,
+          "concrete_m3": 6161.4,
+          "steel_kg": 713004.14,
+          "steel_ton": 713.0
+        },
+        "IfcBeam": {
+          "count": 27,
+          "concrete_m3": 17.99,
+          "steel_kg": 2903.03,
+          "steel_ton": 2.9
+        },
+        "IfcColumn": {
+          "count": 187,
+          "concrete_m3": 256.45,
+          "steel_kg": 36565.04,
+          "steel_ton": 36.57
+        }
+      }
+    },
+    "C1": {
+      "total_all_elements": 695,
+      "concrete_m3": 4420.87,
+      "steel_kg": 542504.8,
+      "steel_ton": 542.5,
+      "pile_count": 427,
+      "pile_concrete_m3": 3436.6,
+      "by_type": {
+        "IfcBeam": {
+          "count": 287,
+          "concrete_m3": 328.55,
+          "steel_kg": 53029.11,
+          "steel_ton": 53.03
+        },
+        "IfcSlab": {
+          "count": 248,
+          "concrete_m3": 3500.1,
+          "steel_kg": 405035.4,
+          "steel_ton": 405.04
+        },
+        "IfcWallStandardCase": {
+          "count": 160,
+          "concrete_m3": 592.22,
+          "steel_kg": 84440.28,
+          "steel_ton": 84.44
+        }
+      }
+    },
+    "C2": {
+      "total_all_elements": 65,
+      "concrete_m3": 1454.27,
+      "steel_kg": 168790.88,
+      "steel_ton": 168.79,
+      "pile_count": 436,
+      "pile_concrete_m3": 1424.5,
+      "by_type": {
+        "IfcSlab": {
+          "count": 36,
+          "concrete_m3": 1439.02,
+          "steel_kg": 166525.14,
+          "steel_ton": 166.53
+        },
+        "IfcColumn": {
+          "count": 10,
+          "concrete_m3": 9.0,
+          "steel_kg": 1283.15,
+          "steel_ton": 1.28
+        },
+        "IfcBeam": {
+          "count": 14,
+          "concrete_m3": 4.84,
+          "steel_kg": 780.89,
+          "steel_ton": 0.78
+        },
+        "IfcWallStandardCase": {
+          "count": 5,
+          "concrete_m3": 1.41,
+          "steel_kg": 201.7,
+          "steel_ton": 0.2
+        }
+      }
+    },
+    "C3": {
+      "total_all_elements": 264,
+      "concrete_m3": 2873.84,
+      "steel_kg": 340896.45,
+      "steel_ton": 340.9,
+      "pile_count": 436,
+      "pile_concrete_m3": 1424.5,
+      "by_type": {
+        "IfcColumn": {
+          "count": 52,
+          "concrete_m3": 63.36,
+          "steel_kg": 9033.73,
+          "steel_ton": 9.03
+        },
+        "IfcSlab": {
+          "count": 82,
+          "concrete_m3": 2578.69,
+          "steel_kg": 298408.55,
+          "steel_ton": 298.41
+        },
+        "IfcWallStandardCase": {
+          "count": 89,
+          "concrete_m3": 210.34,
+          "steel_kg": 29990.87,
+          "steel_ton": 29.99
+        },
+        "IfcBeam": {
+          "count": 41,
+          "concrete_m3": 21.46,
+          "steel_kg": 3463.31,
+          "steel_ton": 3.46
+        }
+      }
+    },
+    "C4": {
+      "total_all_elements": 1031,
+      "concrete_m3": 6450.52,
+      "steel_kg": 796208.1,
+      "steel_ton": 796.21,
+      "pile_count": 458,
+      "pile_concrete_m3": 2389.58,
+      "by_type": {
+        "IfcWallStandardCase": {
+          "count": 171,
+          "concrete_m3": 807.82,
+          "steel_kg": 115182.45,
+          "steel_ton": 115.18
+        },
+        "IfcSlab": {
+          "count": 275,
+          "concrete_m3": 4899.33,
+          "steel_kg": 566955.6,
+          "steel_ton": 566.96
+        },
+        "IfcBeam": {
+          "count": 356,
+          "concrete_m3": 429.27,
+          "steel_kg": 69285.67,
+          "steel_ton": 69.29
+        },
+        "IfcColumn": {
+          "count": 229,
+          "concrete_m3": 314.09,
+          "steel_kg": 44784.37,
+          "steel_ton": 44.78
+        }
+      }
+    },
+    "D1": {
+      "total_all_elements": 481,
+      "concrete_m3": 5721.28,
+      "steel_kg": 671770.71,
+      "steel_ton": 671.77,
+      "pile_count": 871,
+      "pile_concrete_m3": 5297.36,
+      "by_type": {
+        "IfcWallStandardCase": {
+          "count": 180,
+          "concrete_m3": 247.64,
+          "steel_kg": 35310.11,
+          "steel_ton": 35.31
+        },
+        "IfcBeam": {
+          "count": 51,
+          "concrete_m3": 14.84,
+          "steel_kg": 2395.99,
+          "steel_ton": 2.4
+        },
+        "IfcSlab": {
+          "count": 123,
+          "concrete_m3": 5370.67,
+          "steel_kg": 621500.43,
+          "steel_ton": 621.5
+        },
+        "IfcColumn": {
+          "count": 127,
+          "concrete_m3": 88.12,
+          "steel_kg": 12564.18,
+          "steel_ton": 12.56
+        }
+      }
+    },
+    "D2": {
+      "total_all_elements": 1282,
+      "concrete_m3": 13816.65,
+      "steel_kg": 1635029.72,
+      "steel_ton": 1635.03,
+      "pile_count": 871,
+      "pile_concrete_m3": 5297.36,
+      "by_type": {
+        "IfcSlab": {
+          "count": 320,
+          "concrete_m3": 12655.33,
+          "steel_kg": 1464489.4,
+          "steel_ton": 1464.49
+        },
+        "IfcBeam": {
+          "count": 410,
+          "concrete_m3": 263.36,
+          "steel_kg": 42506.93,
+          "steel_ton": 42.51
+        },
+        "IfcColumn": {
+          "count": 290,
+          "concrete_m3": 265.83,
+          "steel_kg": 37902.95,
+          "steel_ton": 37.9
+        },
+        "IfcWallStandardCase": {
+          "count": 262,
+          "concrete_m3": 632.12,
+          "steel_kg": 90130.43,
+          "steel_ton": 90.13
+        }
+      }
+    },
+    "E1": {
+      "total_all_elements": 57,
+      "concrete_m3": 3435.02,
+      "steel_kg": 398187.27,
+      "steel_ton": 398.19,
+      "pile_count": 676,
+      "pile_concrete_m3": 3496.41,
+      "by_type": {
+        "IfcWallStandardCase": {
+          "count": 28,
+          "concrete_m3": 20.22,
+          "steel_kg": 2882.64,
+          "steel_ton": 2.88
+        },
+        "IfcColumn": {
+          "count": 24,
+          "concrete_m3": 5.2,
+          "steel_kg": 742.0,
+          "steel_ton": 0.74
+        },
+        "IfcSlab": {
+          "count": 5,
+          "concrete_m3": 3409.6,
+          "steel_kg": 394562.64,
+          "steel_ton": 394.56
+        }
+      }
+    },
+    "E2": {
+      "total_all_elements": 329,
+      "concrete_m3": 10702.85,
+      "steel_kg": 1247271.07,
+      "steel_ton": 1247.27,
+      "pile_count": 671,
+      "pile_concrete_m3": 2696.91,
+      "by_type": {
+        "IfcWallStandardCase": {
+          "count": 120,
+          "concrete_m3": 191.42,
+          "steel_kg": 27293.4,
+          "steel_ton": 27.29
+        },
+        "IfcColumn": {
+          "count": 137,
+          "concrete_m3": 117.21,
+          "steel_kg": 16711.8,
+          "steel_ton": 16.71
+        },
+        "IfcSlab": {
+          "count": 31,
+          "concrete_m3": 10384.71,
+          "steel_kg": 1201730.83,
+          "steel_ton": 1201.73
+        },
+        "IfcBeam": {
+          "count": 41,
+          "concrete_m3": 9.51,
+          "steel_kg": 1535.04,
+          "steel_ton": 1.54
+        }
+      }
+    },
+    "O1": {
+      "total_all_elements": 133,
+      "concrete_m3": 1120.72,
+      "steel_kg": 131447.79,
+      "steel_ton": 131.45,
+      "pile_count": 168,
+      "pile_concrete_m3": 659.22,
+      "by_type": {
+        "IfcBeam": {
+          "count": 16,
+          "concrete_m3": 10.65,
+          "steel_kg": 1719.41,
+          "steel_ton": 1.72
+        },
+        "IfcSlab": {
+          "count": 55,
+          "concrete_m3": 1062.8,
+          "steel_kg": 122988.41,
+          "steel_ton": 122.99
+        },
+        "IfcColumn": {
+          "count": 30,
+          "concrete_m3": 21.64,
+          "steel_kg": 3085.76,
+          "steel_ton": 3.09
+        },
+        "IfcWallStandardCase": {
+          "count": 32,
+          "concrete_m3": 25.63,
+          "steel_kg": 3654.22,
+          "steel_ton": 3.65
+        }
+      }
+    },
+    "O2": {
+      "total_all_elements": 179,
+      "concrete_m3": 2741.04,
+      "steel_kg": 319858.5,
+      "steel_ton": 319.86,
+      "pile_count": 296,
+      "pile_concrete_m3": 1010.07,
+      "by_type": {
+        "IfcColumn": {
+          "count": 69,
+          "concrete_m3": 59.06,
+          "steel_kg": 8421.15,
+          "steel_ton": 8.42
+        },
+        "IfcSlab": {
+          "count": 41,
+          "concrete_m3": 2645.84,
+          "steel_kg": 306180.09,
+          "steel_ton": 306.18
+        },
+        "IfcWallStandardCase": {
+          "count": 60,
+          "concrete_m3": 30.55,
+          "steel_kg": 4356.52,
+          "steel_ton": 4.36
+        },
+        "IfcBeam": {
+          "count": 9,
+          "concrete_m3": 5.58,
+          "steel_kg": 900.74,
+          "steel_ton": 0.9
+        }
+      }
+    },
+    "O3": {
+      "total_all_elements": 158,
+      "concrete_m3": 2685.85,
+      "steel_kg": 312970.83,
+      "steel_ton": 312.97,
+      "pile_count": 295,
+      "pile_concrete_m3": 1068.88,
+      "by_type": {
+        "IfcColumn": {
+          "count": 62,
+          "concrete_m3": 48.36,
+          "steel_kg": 6895.86,
+          "steel_ton": 6.9
+        },
+        "IfcWallStandardCase": {
+          "count": 57,
+          "concrete_m3": 30.31,
+          "steel_kg": 4322.06,
+          "steel_ton": 4.32
+        },
+        "IfcSlab": {
+          "count": 37,
+          "concrete_m3": 2606.13,
+          "steel_kg": 301584.16,
+          "steel_ton": 301.58
+        },
+        "IfcBeam": {
+          "count": 2,
+          "concrete_m3": 1.05,
+          "steel_kg": 168.76,
+          "steel_ton": 0.17
+        }
+      }
+    },
+    "O4": {
+      "total_all_elements": 84,
+      "concrete_m3": 1066.69,
+      "steel_kg": 124351.39,
+      "steel_ton": 124.35,
+      "pile_count": 160,
+      "pile_concrete_m3": 730.35,
+      "by_type": {
+        "IfcSlab": {
+          "count": 43,
+          "concrete_m3": 1032.95,
+          "steel_kg": 119534.15,
+          "steel_ton": 119.53
+        },
+        "IfcColumn": {
+          "count": 18,
+          "concrete_m3": 9.03,
+          "steel_kg": 1287.73,
+          "steel_ton": 1.29
+        },
+        "IfcWallStandardCase": {
+          "count": 22,
+          "concrete_m3": 24.37,
+          "steel_kg": 3474.95,
+          "steel_ton": 3.47
+        },
+        "IfcBeam": {
+          "count": 1,
+          "concrete_m3": 0.34,
+          "steel_kg": 54.55,
+          "steel_ton": 0.05
+        }
+      }
+    },
+    "T": {
+      "total_all_elements": 2,
+      "concrete_m3": 0.37,
+      "steel_kg": 53.12,
+      "steel_ton": 0.05,
+      "pile_count": 0,
+      "pile_concrete_m3": 0.0,
+      "by_type": {
+        "IfcColumn": {
+          "count": 2,
+          "concrete_m3": 0.37,
+          "steel_kg": 53.12,
+          "steel_ton": 0.05
+        }
+      }
+    },
+    "U": {
+      "total_all_elements": 1657,
+      "concrete_m3": 3532.32,
+      "steel_kg": 676457.41,
+      "steel_ton": 676.46,
+      "pile_count": 0,
+      "pile_concrete_m3": 0.0,
+      "by_type": {
+        "IfcOpeningElement": {
+          "count": 816,
+          "concrete_m3": 2143.14,
+          "steel_kg": 439834.46,
+          "steel_ton": 439.83
+        },
+        "IfcBuildingElementProxy": {
+          "count": 525,
+          "concrete_m3": 655.42,
+          "steel_kg": 134510.76,
+          "steel_ton": 134.51
+        },
+        "IfcColumn": {
+          "count": 110,
+          "concrete_m3": 147.41,
+          "steel_kg": 21018.91,
+          "steel_ton": 21.02
+        },
+        "IfcWallStandardCase": {
+          "count": 118,
+          "concrete_m3": 450.57,
+          "steel_kg": 64243.82,
+          "steel_ton": 64.24
+        },
+        "IfcSlab": {
+          "count": 37,
+          "concrete_m3": 121.82,
+          "steel_kg": 14097.21,
+          "steel_ton": 14.1
+        },
+        "IfcStairFlight": {
+          "count": 50,
+          "concrete_m3": 12.16,
+          "steel_kg": 2496.04,
+          "steel_ton": 2.5
+        },
+        "IfcWall": {
+          "count": 1,
+          "concrete_m3": 1.8,
+          "steel_kg": 256.2,
+          "steel_ton": 0.26
+        }
+      }
+    }
+  },
+  "totals": {
+    "required": {
+      "total_all_elements": 53178,
+      "concrete_m3": 385948.23,
+      "steel_kg": 50049344.42,
+      "steel_ton": 50049.34,
+      "pile_concrete_m3": 47865.43,
+      "by_type": {
+        "IfcSlab": {
+          "count": 23176,
+          "concrete_m3": 483088.24,
+          "steel_kg": 55903514.76,
+          "steel_ton": 55903.51
+        },
+        "IfcColumn": {
+          "count": 15488,
+          "concrete_m3": 65892.4,
+          "steel_kg": 9395176.86,
+          "steel_ton": 9395.18
+        },
+        "IfcBeam": {
+          "count": 35898,
+          "concrete_m3": 99379.48,
+          "steel_kg": 16040015.33,
+          "steel_ton": 16040.02
+        },
+        "IfcWallStandardCase": {
+          "count": 8750,
+          "concrete_m3": 105028.11,
+          "steel_kg": 14975287.57,
+          "steel_ton": 14975.29
+        },
+        "IfcWall": {
+          "count": 14,
+          "concrete_m3": 219.12,
+          "steel_kg": 31242.52,
+          "steel_ton": 31.24
+        },
+        "IfcOpeningElement": {
+          "count": 3536,
+          "concrete_m3": 14690.97,
+          "steel_kg": 3015009.48,
+          "steel_ton": 3015.01
+        },
+        "IfcStairFlight": {
+          "count": 698,
+          "concrete_m3": 968.44,
+          "steel_kg": 198751.19,
+          "steel_ton": 198.75
+        },
+        "IfcBuildingElementProxy": {
+          "count": 1834,
+          "concrete_m3": 2629.71,
+          "steel_kg": 539691.12,
+          "steel_ton": 539.69
+        }
+      }
+    },
+    "built": {
+      "total_all_elements": 7313,
+      "concrete_m3": 72354.77,
+      "steel_kg": 8820118.07,
+      "steel_ton": 8820.12,
+      "pile_count": 8481,
+      "pile_concrete_m3": 47865.43,
+      "by_type": {
+        "IfcColumn": {
+          "count": 1544,
+          "concrete_m3": 1643.64,
+          "steel_kg": 234356.67,
+          "steel_ton": 234.36
+        },
+        "IfcWallStandardCase": {
+          "count": 1479,
+          "concrete_m3": 3664.51,
+          "steel_kg": 522499.48,
+          "steel_ton": 522.5
+        },
+        "IfcSlab": {
+          "count": 1546,
+          "concrete_m3": 63075.57,
+          "steel_kg": 7299175.54,
+          "steel_ton": 7299.18
+        },
+        "IfcBeam": {
+          "count": 1352,
+          "concrete_m3": 1158.53,
+          "steel_kg": 186988.91,
+          "steel_ton": 186.99
+        },
+        "IfcOpeningElement": {
+          "count": 816,
+          "concrete_m3": 2143.14,
+          "steel_kg": 439834.46,
+          "steel_ton": 439.83
+        },
+        "IfcBuildingElementProxy": {
+          "count": 525,
+          "concrete_m3": 655.42,
+          "steel_kg": 134510.76,
+          "steel_ton": 134.51
+        },
+        "IfcStairFlight": {
+          "count": 50,
+          "concrete_m3": 12.16,
+          "steel_kg": 2496.04,
+          "steel_ton": 2.5
+        },
+        "IfcWall": {
+          "count": 1,
+          "concrete_m3": 1.8,
+          "steel_kg": 256.2,
+          "steel_ton": 0.26
+        }
+      }
+    }
+  }
+}

@@ -12,7 +12,7 @@ export const AdminOnly = () =>
   applyDecorators(
     UseGuards(JwtAuthGuard),
     SetMetadata(IS_ADMIN_KEY, true),
-    ApiBearerAuth(),
+    ApiBearerAuth('JWT'),
     ApiUnauthorizedResponse({
       description: 'Unauthorized - Admin token required',
     }),
@@ -22,7 +22,7 @@ export const UserOnly = () =>
   applyDecorators(
     UseGuards(JwtAuthGuard),
     SetMetadata(IS_USER_KEY, true),
-    ApiBearerAuth(),
+    ApiBearerAuth('JWT'),
     ApiUnauthorizedResponse({
       description: 'Unauthorized - User token required',
     }),
@@ -31,7 +31,7 @@ export const UserOnly = () =>
 export const AuthRequired = () =>
   applyDecorators(
     UseGuards(JwtAuthGuard),
-    ApiBearerAuth(),
+    ApiBearerAuth('JWT'),
     ApiUnauthorizedResponse({
       description: 'Unauthorized - Invalid or missing JWT token',
     }),

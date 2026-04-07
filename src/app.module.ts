@@ -3,6 +3,14 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeormModule } from './common/typeorm/typeorm.module';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
+import { OrganizationsModule } from './organizations/organizations.module';
+import { ProjectsModule } from './projects/projects.module';
+import { SessionModule } from './session/session.module';
+import { ProgressModule } from './progress/progress.module';
+import { AdminModule } from './admin/admin.module';
+import { SeedModule } from './seed/seed.module';
 
 @Module({
   imports: [
@@ -11,6 +19,14 @@ import { TypeormModule } from './common/typeorm/typeorm.module';
       envFilePath: ['.env.local', '.env'],
     }),
     TypeormModule,
+    OrganizationsModule,
+    UsersModule,
+    ProjectsModule,
+    AuthModule,
+    SessionModule,
+    ProgressModule,
+    AdminModule,
+    SeedModule,
   ],
   controllers: [AppController],
   providers: [AppService],
