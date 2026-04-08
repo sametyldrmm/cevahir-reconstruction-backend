@@ -31,6 +31,11 @@ export class DatabaseSeedService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
+    await this.seedDemoDataIfEmpty();
+  }
+
+  /** Boş veritabanına demo org, kullanıcı, proje, şantiye ve erişim kayıtlarını yazar. */
+  async seedDemoDataIfEmpty(): Promise<void> {
     if ((await this.users.count()) > 0) {
       return;
     }

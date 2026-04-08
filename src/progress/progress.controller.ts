@@ -11,12 +11,15 @@ import { AuthRequired } from '../common/decorators/public.decorator';
 import { User } from '../common/decorators/user.decorator';
 import type { JwtUserShape } from '../access/access-policy.service';
 import { AccessPolicyService } from '../access/access-policy.service';
+import { CleanLogger } from '../common/logger';
 import { ProgressDataService } from './progress-data.service';
 import { ProgressFilterService } from './progress-filter.service';
 
 @ApiTags('progress')
 @Controller('workspaces')
 export class ProgressController {
+  private readonly logger = new CleanLogger(ProgressController.name);
+
   constructor(
     private readonly policy: AccessPolicyService,
     private readonly data: ProgressDataService,
@@ -48,6 +51,9 @@ export class ProgressController {
     );
     const raw = this.data.loadSummary();
     const filtered = this.filter.filterSummary(raw, visibility);
+    this.logger.log(
+      `progress.summary ok ws=${worksiteCode} pid=${projectId.slice(0, 8)} u=${user.id.slice(0, 8)}`,
+    );
     return {
       meta: {
         projectId,
@@ -91,6 +97,9 @@ export class ProgressController {
     if (slice == null) {
       throw new NotFoundException('Block not found or not visible for this user');
     }
+    this.logger.log(
+      `progress.detail ok ws=${worksiteCode} blk=${blockId} pid=${projectId.slice(0, 8)} u=${user.id.slice(0, 8)}`,
+    );
     return {
       meta: {
         projectId,

@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { HttpRequestLoggingInterceptor } from './common/logger';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeormModule } from './common/typeorm/typeorm.module';
@@ -29,6 +31,10 @@ import { SeedModule } from './seed/seed.module';
     SeedModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    /** Tum HTTP controller endpointleri icin tek satir request logu */
+    { provide: APP_INTERCEPTOR, useClass: HttpRequestLoggingInterceptor },
+  ],
 })
 export class AppModule {}
