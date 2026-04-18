@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
+import { ScheduleModule } from '@nestjs/schedule';
 import { HttpRequestLoggingInterceptor } from './common/logger';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -13,6 +14,7 @@ import { SessionModule } from './session/session.module';
 import { ProgressModule } from './progress/progress.module';
 import { AdminModule } from './admin/admin.module';
 import { SeedModule } from './seed/seed.module';
+import { UploadsModule } from './uploads/uploads.module';
 
 @Module({
   imports: [
@@ -20,6 +22,7 @@ import { SeedModule } from './seed/seed.module';
       isGlobal: true,
       envFilePath: ['.env.local', '.env'],
     }),
+    ScheduleModule.forRoot(),
     TypeormModule,
     OrganizationsModule,
     UsersModule,
@@ -29,6 +32,7 @@ import { SeedModule } from './seed/seed.module';
     ProgressModule,
     AdminModule,
     SeedModule,
+    UploadsModule,
   ],
   controllers: [AppController],
   providers: [

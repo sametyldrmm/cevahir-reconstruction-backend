@@ -8,6 +8,7 @@ import { AuthGuard } from '@nestjs/passport';
 import {
   IS_ADMIN_KEY,
   IS_PUBLIC_KEY,
+  IS_UPLOAD_KEY,
   IS_USER_KEY,
 } from '../decorators/public.decorator';
 
@@ -51,6 +52,15 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
     if (isUserOnly && String(user.role).toUpperCase() !== 'USER') {
       throw new ForbiddenException('User access required');
+    }
+
+    const isUploadOnly = this.reflector.getAllAndOverride<boolean>(
+      IS_UPLOAD_KEY,
+      [context.getHandler(), context.getClass()],
+    );
+
+    if (isUploadOnly && String(user.role).toUpperCase() !== 'UPLOAD') {
+      throw new ForbiddenException('Upload access required');
     }
 
     return user;

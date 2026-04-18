@@ -5,6 +5,7 @@ import { JwtAuthGuard } from '../jwt/jwt-auth.guard';
 export const IS_PUBLIC_KEY = 'isPublic';
 export const IS_ADMIN_KEY = 'isAdmin';
 export const IS_USER_KEY = 'isUser';
+export const IS_UPLOAD_KEY = 'isUpload';
 
 export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
 
@@ -25,6 +26,16 @@ export const UserOnly = () =>
     ApiBearerAuth('JWT'),
     ApiUnauthorizedResponse({
       description: 'Unauthorized - User token required',
+    }),
+  );
+
+export const UploadOnly = () =>
+  applyDecorators(
+    UseGuards(JwtAuthGuard),
+    SetMetadata(IS_UPLOAD_KEY, true),
+    ApiBearerAuth('JWT'),
+    ApiUnauthorizedResponse({
+      description: 'Unauthorized - Upload token required',
     }),
   );
 

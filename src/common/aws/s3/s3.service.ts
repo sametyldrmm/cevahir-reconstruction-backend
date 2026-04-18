@@ -144,6 +144,182 @@ export class S3Service {
     }
   }
 
+  async createMultipartUpload(options: {
+    key: string;
+    contentType: string;
+    metadata?: Record<string, string>;
+  }): Promise<{ uploadId: string; key: string }> {
+    try {
+      const result = await this.s3
+        .createMultipartUpload({
+          Bucket: this.bucketName,
+          Key: options.key,
+          ContentType: options.contentType,
+          Metadata: options.metadata,
+        })
+        .promise();
+
+      if (!result.UploadId) {
+        throw new Error('S3 did not return an uploadId');
+      }
+
+      this.logger.log(`Created multipart upload for key: ${options.key}`);
+      return {
+        uploadId: result.UploadId,
+        key: options.key,
+      };
+    } catch (error: any) {
+      this.logger.error(
+        `Error creating multipart upload: ${error.message}`,
+        error.stack,
+      );
+      throw error;
+    }
+  }
+
+  async generateUploadPartPresignedUrl(options: {
+    key: string;
+    uploadId: string;
+    partNumber: number;
+    expiresIn?: number;
+  }): Promise<string> {
+    try {
+      return await this.s3.getSignedUrlPromise('uploadPart', {
+        Bucket: this.bucketName,
+        Key: options.key,
+        UploadId: options.uploadId,
+        PartNumber: options.partNumber,
+        Expires: options.expiresIn ?? 900,
+      });
+    } catch (error: any) {
+      this.logger.error(
+        `Error generating upload part URL: ${error.message}`,
+        error.stack,
+      );
+      throw error;
+    }
+  }
+
+  async listUploadedParts(options: {
+    key: string;
+    uploadId: string;
+  }): Promise<
+    Array<{
+      partNumber: number;
+      etag: string;
+      size: number;
+      lastModified: Date | null;
+    }>
+  > {
+    const out: Array<{
+      partNumber: number;
+      etag: string;
+      size: number;
+      lastModified: Date | null;
+    }> = [];
+
+    let partNumberMarker: number | undefined;
+
+    try {
+      do {
+        const result = await this.s3
+          .listParts({
+            Bucket: this.bucketName,
+            Key: options.key,
+            UploadId: options.uploadId,
+            PartNumberMarker: partNumberMarker,
+          })
+          .promise();
+
+        for (const part of result.Parts ?? []) {
+          if (!part.PartNumber || !part.ETag) {
+            continue;
+          }
+          out.push({
+            partNumber: part.PartNumber,
+            etag: part.ETag,
+            size: part.Size ?? 0,
+            lastModified: part.LastModified ?? null,
+          });
+        }
+
+        partNumberMarker = result.IsTruncated
+          ? result.NextPartNumberMarker
+          : undefined;
+      } while (partNumberMarker);
+
+      return out.sort((a, b) => a.partNumber - b.partNumber);
+    } catch (error: any) {
+      this.logger.error(
+        `Error listing multipart upload parts: ${error.message}`,
+        error.stack,
+      );
+      throw error;
+    }
+  }
+
+  async completeMultipartUpload(options: {
+    key: string;
+    uploadId: string;
+    parts: Array<{ partNumber: number; etag: string }>;
+  }): Promise<{ bucket: string; key: string; etag?: string; location?: string }> {
+    try {
+      const result = await this.s3
+        .completeMultipartUpload({
+          Bucket: this.bucketName,
+          Key: options.key,
+          UploadId: options.uploadId,
+          MultipartUpload: {
+            Parts: options.parts
+              .slice()
+              .sort((a, b) => a.partNumber - b.partNumber)
+              .map((part) => ({
+                PartNumber: part.partNumber,
+                ETag: part.etag,
+              })),
+          },
+        })
+        .promise();
+
+      this.logger.log(`Completed multipart upload for key: ${options.key}`);
+      return {
+        bucket: this.bucketName,
+        key: options.key,
+        etag: result.ETag,
+        location: result.Location,
+      };
+    } catch (error: any) {
+      this.logger.error(
+        `Error completing multipart upload: ${error.message}`,
+        error.stack,
+      );
+      throw error;
+    }
+  }
+
+  async abortMultipartUpload(options: {
+    key: string;
+    uploadId: string;
+  }): Promise<void> {
+    try {
+      await this.s3
+        .abortMultipartUpload({
+          Bucket: this.bucketName,
+          Key: options.key,
+          UploadId: options.uploadId,
+        })
+        .promise();
+
+      this.logger.log(`Aborted multipart upload for key: ${options.key}`);
+    } catch (error: any) {
+      this.logger.error(
+        `Error aborting multipart upload: ${error.message}`,
+        error.stack,
+      );
+      throw error;
+    }
+  }
+
   /**
    * Download için presigned URL oluştur
    */

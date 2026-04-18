@@ -52,7 +52,7 @@ export const getAutoDatabaseConfig = (): TypeOrmModuleOptions => {
     username: parsed.username,
     password: parsed.password,
     database: parsed.database,
-    ssl: isSsl ? { rejectUnauthorized: false } : false,
+    ssl: false,
     entities: [__dirname + '/../../**/*.entity{.ts,.js}'],
     synchronize: true,
     dropSchema: false,
