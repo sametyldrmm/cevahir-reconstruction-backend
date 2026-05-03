@@ -13,6 +13,7 @@ import { ProjectsModule } from './projects/projects.module';
 import { SessionModule } from './session/session.module';
 import { ProgressModule } from './progress/progress.module';
 import { AdminModule } from './admin/admin.module';
+import { SuperadminModule } from './superadmin/superadmin.module';
 import { SeedModule } from './seed/seed.module';
 import { UploadsModule } from './uploads/uploads.module';
 
@@ -31,6 +32,7 @@ import { UploadsModule } from './uploads/uploads.module';
     SessionModule,
     ProgressModule,
     AdminModule,
+    SuperadminModule,
     SeedModule,
     UploadsModule,
   ],

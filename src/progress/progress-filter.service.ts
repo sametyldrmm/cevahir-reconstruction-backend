@@ -11,9 +11,15 @@ export class ProgressFilterService {
   filterSummary(
     raw: ConstructionSummary,
     v: EffectiveVisibility,
+    requestedBlockIds?: string[],
   ): ConstructionSummary {
     const reqKeys = Object.keys(raw.required).filter((k) => k !== 'totals');
     let blocks = reqKeys;
+
+    if (requestedBlockIds?.length) {
+      const requested = new Set(requestedBlockIds.map((id) => id.trim()));
+      blocks = blocks.filter((k) => requested.has(k));
+    }
 
     if (v.visibleBlockIds?.length) {
       const allow = new Set(v.visibleBlockIds);

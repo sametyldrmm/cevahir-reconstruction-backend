@@ -30,4 +30,7 @@ export class User {
 
   @Column({ name: 'session_version', type: 'int', default: 1 })
   sessionVersion: number;
+
+  @Column({ name: 'page_permissions', type: 'text', array: true, default: '{}' })
+  pagePermissions: string[];
 }

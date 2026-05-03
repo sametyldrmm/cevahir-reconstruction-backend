@@ -11,25 +11,66 @@ import { Project } from '../projects/entities/project.entity';
 import { UserProjectAccess } from '../projects/entities/user-project-access.entity';
 import { VisibilityProfile } from '../projects/entities/visibility-profile.entity';
 import { Worksite } from '../projects/entities/worksite.entity';
+import { Organization } from '../organizations/entities/organization.entity';
 import {
   ADMIN_VISIBILITY,
   DEFAULT_VISIBILITY,
   type EffectiveVisibility,
   mergeVisibility,
 } from './domain/visibility.types';
+import {
+  isAdminLikeRole,
+  isUserRole,
+  isUploadRole,
+  isSuperAdminRole,
+  normalizeUserRole,
+} from '../users/domain/user-role.constants';
 
 export interface JwtUserShape {
   id: string;
   email: string;
   role: string;
   organizationId?: string;
+  pagePermissions?: string[];
 }
 
 export interface SessionProjectDto {
   id: string;
   slug: string;
   name: string;
+  organizationId: string;
+  fullProjectAccess: boolean;
   worksiteCodes: string[];
+}
+
+export interface SessionVisibilityProfileDto {
+  projectId: string;
+  projectSlug: string;
+  worksiteId: string | null;
+  worksiteCode: string | null;
+  featureFlags: Record<string, boolean>;
+  visibleBlockIds: string[] | null;
+  hiddenBlockIds: string[];
+}
+
+export interface SessionPermissionMapDto {
+  organizationIds: string[];
+  pagePermissions: string[];
+  projects: SessionProjectDto[];
+  visibilityProfiles: SessionVisibilityProfileDto[];
+  roleCapabilities: SessionRoleCapabilitiesDto;
+}
+
+export interface SessionRoleCapabilitiesDto {
+  canAccessAllPages: boolean;
+  canAccessAllData: boolean;
+  canAccessSuperadminRoutes: boolean;
+  canAccessAdminRoutes: boolean;
+  canAccessUploadRoutes: boolean;
+  uploadRoutesOnly: boolean;
+  usesAssignedPagePermissions: boolean;
+  usesAssignedProjectAccess: boolean;
+  usesAssignedVisibilityProfiles: boolean;
 }
 
 export interface SessionBootstrapDto {
@@ -38,9 +79,12 @@ export interface SessionBootstrapDto {
     email: string;
     role: string;
     sessionVersion: number;
+    pagePermissions: string[];
   };
   organizationId: string;
   projects: SessionProjectDto[];
+  visibilityProfiles: SessionVisibilityProfileDto[];
+  permissions: SessionPermissionMapDto;
 }
 
 @Injectable()
@@ -55,6 +99,8 @@ export class AccessPolicyService {
     private readonly worksites: Repository<Worksite>,
     @InjectRepository(VisibilityProfile)
     private readonly profiles: Repository<VisibilityProfile>,
+    @InjectRepository(Organization)
+    private readonly organizations: Repository<Organization>,
   ) {}
 
   async buildSession(user: JwtUserShape): Promise<SessionBootstrapDto> {
@@ -62,20 +108,131 @@ export class AccessPolicyService {
     if (!row) {
       throw new ForbiddenException('User not found');
     }
-    const projectDtos = await this.getAccessibleProjects(row.id);
+    const organizationIds = await this.getAccessibleOrganizationIds(row);
+    const projectDtos = await this.getAccessibleProjects(row);
+    const visibilityProfiles = await this.getVisibilityProfilesForSession(row);
+    const roleCapabilities = this.buildRoleCapabilities(row.role);
+    const effectivePagePermissions =
+      this.usersService.getEffectivePagePermissionsForUser(row);
     return {
       user: {
         id: row.id,
         email: row.email,
         role: row.role,
         sessionVersion: row.sessionVersion,
+        pagePermissions: effectivePagePermissions,
       },
       organizationId: row.organizationId,
       projects: projectDtos,
+      visibilityProfiles,
+      permissions: {
+        organizationIds,
+        pagePermissions: effectivePagePermissions,
+        projects: projectDtos,
+        visibilityProfiles,
+        roleCapabilities,
+      },
     };
   }
 
-  private async getAccessibleProjects(userId: string): Promise<SessionProjectDto[]> {
+  private buildRoleCapabilities(role: string): SessionRoleCapabilitiesDto {
+    if (isSuperAdminRole(role)) {
+      return {
+        canAccessAllPages: true,
+        canAccessAllData: true,
+        canAccessSuperadminRoutes: true,
+        canAccessAdminRoutes: true,
+        canAccessUploadRoutes: true,
+        uploadRoutesOnly: false,
+        usesAssignedPagePermissions: false,
+        usesAssignedProjectAccess: false,
+        usesAssignedVisibilityProfiles: false,
+      };
+    }
+
+    if (normalizeUserRole(role) === 'ADMIN') {
+      return {
+        canAccessAllPages: true,
+        canAccessAllData: true,
+        canAccessSuperadminRoutes: false,
+        canAccessAdminRoutes: true,
+        canAccessUploadRoutes: true,
+        uploadRoutesOnly: false,
+        usesAssignedPagePermissions: false,
+        usesAssignedProjectAccess: false,
+        usesAssignedVisibilityProfiles: false,
+      };
+    }
+
+    if (normalizeUserRole(role) === 'UPLOAD') {
+      return {
+        canAccessAllPages: false,
+        canAccessAllData: false,
+        canAccessSuperadminRoutes: false,
+        canAccessAdminRoutes: false,
+        canAccessUploadRoutes: true,
+        uploadRoutesOnly: true,
+        usesAssignedPagePermissions: false,
+        usesAssignedProjectAccess: false,
+        usesAssignedVisibilityProfiles: false,
+      };
+    }
+
+    return {
+      canAccessAllPages: false,
+      canAccessAllData: false,
+      canAccessSuperadminRoutes: false,
+      canAccessAdminRoutes: false,
+      canAccessUploadRoutes: false,
+      uploadRoutesOnly: false,
+      usesAssignedPagePermissions: true,
+      usesAssignedProjectAccess: true,
+      usesAssignedVisibilityProfiles: true,
+    };
+  }
+
+  private async getAccessibleOrganizationIds(user: User): Promise<string[]> {
+    if (isSuperAdminRole(user.role)) {
+      const rows = await this.organizations.find({
+        order: {
+          name: 'ASC',
+        },
+      });
+
+      return rows.map((row) => row.id);
+    }
+
+    return [user.organizationId];
+  }
+
+  private async getAccessibleProjects(user: User): Promise<SessionProjectDto[]> {
+    if (isUploadRole(user.role)) {
+      return [];
+    }
+
+    if (isAdminLikeRole(user.role)) {
+      const rows = await this.projects.find({
+        where: isSuperAdminRole(user.role)
+          ? undefined
+          : { organizationId: user.organizationId },
+        relations: ['worksites'],
+      });
+
+      return rows
+        .map((project) => ({
+          id: project.id,
+          slug: project.slug,
+          name: project.name,
+          organizationId: project.organizationId,
+          fullProjectAccess: true,
+          worksiteCodes: (project.worksites ?? [])
+            .map((worksite) => worksite.code)
+            .sort((a, b) => a.localeCompare(b, 'tr')),
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name, 'tr'));
+    }
+
+    const userId = user.id;
     const rows = await this.access.find({
       where: { userId },
       relations: ['project', 'project.worksites', 'worksite'],
@@ -121,22 +278,90 @@ export class AccessPolicyService {
         id: project.id,
         slug: project.slug,
         name: project.name,
+        organizationId: project.organizationId,
+        fullProjectAccess: codes === null,
         worksiteCodes: allowed.sort((a, b) => a.localeCompare(b, 'tr')),
       });
     }
     return out.sort((a, b) => a.name.localeCompare(b.name, 'tr'));
   }
 
-  async assertWorksiteInProject(
+  private async getVisibilityProfilesForSession(
+    user: User,
+  ): Promise<SessionVisibilityProfileDto[]> {
+    if (isAdminLikeRole(user.role) || isUploadRole(user.role)) {
+      return [];
+    }
+
+    const rows = await this.profiles.find({
+      where: { userId: user.id },
+      relations: ['project', 'worksite'],
+    });
+
+    return rows
+      .map((row) => ({
+        projectId: row.projectId,
+        projectSlug: row.project?.slug ?? '',
+        worksiteId: row.worksite?.id ?? null,
+        worksiteCode: row.worksite?.code ?? null,
+        featureFlags: row.featureFlags ?? {},
+        visibleBlockIds: row.visibleBlockIds ?? null,
+        hiddenBlockIds: row.hiddenBlockIds ?? [],
+      }))
+      .sort((a, b) => {
+        const byProject = a.projectSlug.localeCompare(b.projectSlug, 'tr');
+        if (byProject !== 0) {
+          return byProject;
+        }
+
+        return (a.worksiteCode ?? '').localeCompare(b.worksiteCode ?? '', 'tr');
+      });
+  }
+
+  async buildPermissionMap(user: JwtUserShape): Promise<SessionPermissionMapDto> {
+    const session = await this.buildSession(user);
+
+    return session.permissions;
+  }
+
+  async buildPermissionMapForUser(targetUserId: string): Promise<SessionPermissionMapDto> {
+    const row = await this.usersService.findById(targetUserId);
+    if (!row) {
+      throw new NotFoundException('User not found');
+    }
+
+    return this.buildPermissionMap({
+      id: row.id,
+      email: row.email,
+      role: row.role,
+      organizationId: row.organizationId,
+      pagePermissions: row.pagePermissions ?? [],
+    });
+  }
+
+  async assertProjectAccess(
     userId: string,
     role: string,
     organizationId: string | undefined,
     projectId: string,
-    worksiteCode: string,
-  ): Promise<{ project: Project; worksite: Worksite; user: User }> {
+  ): Promise<{
+    project: Project;
+    user: User;
+    fullProjectAccess: boolean;
+    worksiteCodes: string[];
+  }> {
     const userRow = await this.usersService.findById(userId);
-    if (!userRow) throw new ForbiddenException('User not found');
-    if (organizationId && userRow.organizationId !== organizationId) {
+    if (!userRow) {
+      throw new ForbiddenException('User not found');
+    }
+    if (isUploadRole(role)) {
+      throw new ForbiddenException('Upload users cannot access project data');
+    }
+    if (
+      organizationId &&
+      userRow.organizationId !== organizationId &&
+      !isSuperAdminRole(role)
+    ) {
       throw new ForbiddenException('Organization mismatch');
     }
 
@@ -144,21 +369,25 @@ export class AccessPolicyService {
       where: { id: projectId },
       relations: ['worksites'],
     });
-    if (!project) throw new NotFoundException('Project not found');
-    if (userRow.organizationId !== project.organizationId) {
+    if (!project) {
+      throw new NotFoundException('Project not found');
+    }
+    if (
+      userRow.organizationId !== project.organizationId &&
+      !isSuperAdminRole(role)
+    ) {
       throw new ForbiddenException('Project not in organization');
     }
 
-    const worksite = project.worksites?.find((w) => w.code === worksiteCode);
-    if (!worksite) {
-      throw new NotFoundException('Worksite not found in project');
-    }
-
-    if (String(role).toUpperCase() === 'ADMIN') {
-      if (userRow.organizationId !== project.organizationId) {
-        throw new ForbiddenException('Admin cannot cross organization');
-      }
-      return { project, worksite, user: userRow };
+    if (isAdminLikeRole(role)) {
+      return {
+        project,
+        user: userRow,
+        fullProjectAccess: true,
+        worksiteCodes: (project.worksites ?? [])
+          .map((worksite) => worksite.code)
+          .sort((a, b) => a.localeCompare(b, 'tr')),
+      };
     }
 
     const accesses = await this.access.find({
@@ -169,13 +398,87 @@ export class AccessPolicyService {
       throw new ForbiddenException('No access to project');
     }
 
-    const full = accesses.some((a) => !a.worksite);
-    if (!full) {
-      const ok = accesses.some((a) => a.worksite?.code === worksiteCode);
-      if (!ok) throw new ForbiddenException('No access to worksite');
+    const fullProjectAccess = accesses.some((access) => !access.worksite);
+    const worksiteCodes = fullProjectAccess
+      ? (project.worksites ?? []).map((worksite) => worksite.code)
+      : accesses
+          .map((access) => access.worksite?.code)
+          .filter((code): code is string => Boolean(code));
+
+    return {
+      project,
+      user: userRow,
+      fullProjectAccess,
+      worksiteCodes: [...new Set(worksiteCodes)].sort((a, b) =>
+        a.localeCompare(b, 'tr'),
+      ),
+    };
+  }
+
+  async assertWorksiteInProject(
+    userId: string,
+    role: string,
+    organizationId: string | undefined,
+    projectId: string,
+    worksiteCode: string,
+  ): Promise<{ project: Project; worksite: Worksite; user: User }> {
+    const { project, user: userRow, fullProjectAccess, worksiteCodes } =
+      await this.assertProjectAccess(userId, role, organizationId, projectId);
+    const worksite = project.worksites?.find((w) => w.code === worksiteCode);
+    if (!worksite) {
+      throw new NotFoundException('Worksite not found in project');
+    }
+
+    if (!fullProjectAccess && !worksiteCodes.includes(worksiteCode)) {
+      throw new ForbiddenException('No access to worksite');
     }
 
     return { project, worksite, user: userRow };
+  }
+
+  isBlockVisible(visibility: EffectiveVisibility, blockId: string) {
+    const normalizedBlockId = blockId.trim();
+    if (!normalizedBlockId) {
+      return false;
+    }
+
+    if (
+      visibility.visibleBlockIds !== null &&
+      !visibility.visibleBlockIds.includes(normalizedBlockId)
+    ) {
+      return false;
+    }
+
+    return !visibility.hiddenBlockIds.includes(normalizedBlockId);
+  }
+
+  async assertBlockVisible(
+    userId: string,
+    role: string,
+    organizationId: string | undefined,
+    projectId: string,
+    worksiteCode: string,
+    blockId: string,
+  ) {
+    const { project, worksite, user } = await this.assertWorksiteInProject(
+      userId,
+      role,
+      organizationId,
+      projectId,
+      worksiteCode,
+    );
+    const visibility = await this.getEffectiveVisibility(
+      userId,
+      role,
+      projectId,
+      worksite.id,
+    );
+
+    if (!this.isBlockVisible(visibility, blockId)) {
+      throw new ForbiddenException('No access to block');
+    }
+
+    return { project, worksite, user, visibility };
   }
 
   async getEffectiveVisibility(
@@ -184,7 +487,7 @@ export class AccessPolicyService {
     projectId: string,
     worksiteId: string | null,
   ): Promise<EffectiveVisibility> {
-    if (String(role).toUpperCase() === 'ADMIN') {
+    if (isAdminLikeRole(role)) {
       return { ...ADMIN_VISIBILITY };
     }
 
@@ -232,12 +535,44 @@ export class AccessPolicyService {
     const admin = await this.usersService.findById(adminUserId);
     const target = await this.usersService.findById(targetUserId);
     if (!admin || !target) throw new NotFoundException('User not found');
-    if (String(admin.role).toUpperCase() !== 'ADMIN') {
+    if (!isAdminLikeRole(admin.role)) {
       throw new ForbiddenException('Admin only');
     }
-    if (admin.organizationId !== target.organizationId) {
+    if (
+      normalizeUserRole(admin.role) === 'ADMIN' &&
+      admin.organizationId !== target.organizationId
+    ) {
       throw new ForbiddenException('Different organization');
     }
+    return { admin, target };
+  }
+
+  async assertAdminCanManageAccount(
+    adminUserId: string,
+    targetUserId: string,
+  ): Promise<{ admin: User; target: User }> {
+    const { admin, target } = await this.assertAdminSameOrg(adminUserId, targetUserId);
+
+    if (!isUserRole(target.role) && !isUploadRole(target.role)) {
+      throw new ForbiddenException('Admins can only manage USER and UPLOAD accounts');
+    }
+
+    return { admin, target };
+  }
+
+  async assertAdminCanManageUserPermissions(
+    adminUserId: string,
+    targetUserId: string,
+  ): Promise<{ admin: User; target: User }> {
+    const { admin, target } = await this.assertAdminCanManageAccount(
+      adminUserId,
+      targetUserId,
+    );
+
+    if (!isUserRole(target.role)) {
+      throw new ForbiddenException('Only USER accounts can receive page and data permissions');
+    }
+
     return { admin, target };
   }
 
@@ -253,6 +588,19 @@ export class AccessPolicyService {
       where: { userId: targetUserId },
       relations: ['project', 'worksite'],
     });
+  }
+
+  async deleteVisibilityProfile(targetUserId: string, profileId: string) {
+    const existing = await this.profiles.findOne({
+      where: { id: profileId, userId: targetUserId },
+    });
+    if (!existing) {
+      throw new NotFoundException('Visibility profile not found');
+    }
+
+    await this.profiles.delete({ id: profileId });
+    await this.bumpSessionVersion(targetUserId);
+    return { ok: true, userId: targetUserId, profileId };
   }
 
   async replaceProjectAccess(
@@ -365,5 +713,27 @@ export class AccessPolicyService {
       featureFlags: patch,
     });
     return row;
+  }
+
+  async getPagePermissions(targetUserId: string) {
+    const row = await this.usersService.findById(targetUserId);
+    if (!row) {
+      throw new NotFoundException('User not found');
+    }
+
+    return this.usersService.getEffectivePagePermissionsForUser(row);
+  }
+
+  async updatePagePermissions(targetUserId: string, pagePermissions: string[]) {
+    const row = await this.usersService.updatePagePermissions(
+      targetUserId,
+      pagePermissions,
+    );
+    if (!row) {
+      throw new NotFoundException('User not found');
+    }
+
+    await this.bumpSessionVersion(targetUserId);
+    return this.usersService.getEffectivePagePermissionsForUser(row);
   }
 }

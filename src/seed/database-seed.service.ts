@@ -55,6 +55,7 @@ export class DatabaseSeedService implements OnModuleInit {
         role: 'ADMIN',
         organizationId: SEED.orgId,
         sessionVersion: 1,
+        pagePermissions: [],
       }),
       this.users.create({
         id: SEED.viewerUserId,
@@ -63,6 +64,7 @@ export class DatabaseSeedService implements OnModuleInit {
         role: 'USER',
         organizationId: SEED.orgId,
         sessionVersion: 1,
+        pagePermissions: ['dashboard.view', 'blocks.view'],
       }),
     ]);
 

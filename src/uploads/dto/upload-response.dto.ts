@@ -92,6 +92,16 @@ export class UploadInitResponseDto {
   expiresAt: Date;
 }
 
+export class ImageUploadInitItemDto extends UploadInitResponseDto {}
+
+export class ImageUploadBatchInitResponseDto {
+  @ApiProperty({ example: 2 })
+  count: number;
+
+  @ApiProperty({ type: [ImageUploadInitItemDto] })
+  uploads: ImageUploadInitItemDto[];
+}
+
 export class UploadSignPartResponseDto {
   @ApiProperty({ format: 'uuid' })
   sessionId: string;

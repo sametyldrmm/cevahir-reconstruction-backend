@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import type { JwtUserShape } from '../access/access-policy.service';
@@ -12,6 +12,12 @@ describe('UploadsService', () => {
     email: 'Upload.User@Example.com',
     organizationId: '521887a1-bf05-42d0-a086-d07dd36d9358',
     role: 'UPLOAD',
+  } as JwtUserShape;
+  const superadminUser = {
+    id: '7163af5b-f34f-4924-b443-cff78691646c',
+    email: 'Super.Admin@Example.com',
+    organizationId: '521887a1-bf05-42d0-a086-d07dd36d9358',
+    role: 'SUPERADMIN',
   } as JwtUserShape;
 
   const createSession = (
@@ -198,5 +204,102 @@ describe('UploadsService', () => {
     expect(result.objectKey).toBe(
       'Construction-Uploads/upload.user@example.com/My Report Final.zip',
     );
+  });
+
+  it('allows superadmin users on the standard upload flow', async () => {
+    const { service, repo, s3 } = createService({
+      AWS_S3_BUCKET_NAME: 'uploads-bucket',
+      UPLOAD_SESSION_TTL_MS: 60000,
+    });
+    s3.createMultipartUpload.mockResolvedValue({
+      uploadId: 'multipart-upload-id',
+      key: 'Construction-Uploads/super.admin@example.com/My Report Final.zip',
+    });
+
+    const result = await service.initUpload(superadminUser, {
+      fileName: 'My Report Final.zip',
+      fileSize: 1024,
+      contentType: 'application/zip',
+      folder: 'ignored-folder',
+      metadata: undefined,
+    });
+
+    expect(repo.save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        objectKey:
+          'Construction-Uploads/super.admin@example.com/My Report Final.zip',
+      }),
+    );
+    expect(result.objectKey).toBe(
+      'Construction-Uploads/super.admin@example.com/My Report Final.zip',
+    );
+  });
+
+  it('creates superadmin image upload sessions under Construction-Uploads/images/<projectName>/', async () => {
+    const { service, repo, s3 } = createService({
+      AWS_S3_BUCKET_NAME: 'uploads-bucket',
+      UPLOAD_SESSION_TTL_MS: 60000,
+    });
+    s3.createMultipartUpload
+      .mockResolvedValueOnce({
+        uploadId: 'multipart-upload-id-1',
+        key: 'Construction-Uploads/images/Cevahir-Kuzey/image-1.jpg',
+      })
+      .mockResolvedValueOnce({
+        uploadId: 'multipart-upload-id-2',
+        key: 'Construction-Uploads/images/Cevahir-Kuzey/image-2.png',
+      });
+
+    const result = await service.initImageUploadsAsSuperadmin(superadminUser, {
+      projectName: 'Cevahir Kuzey',
+      files: [
+        {
+          fileName: 'image-1.jpg',
+          fileSize: 2048,
+          contentType: 'image/jpeg',
+        },
+        {
+          fileName: 'nested/image-2.png',
+          fileSize: 4096,
+          contentType: 'image/png',
+        },
+      ],
+    });
+
+    expect(s3.createMultipartUpload).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        key: 'Construction-Uploads/images/Cevahir-Kuzey/image-1.jpg',
+      }),
+    );
+    expect(s3.createMultipartUpload).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        key: 'Construction-Uploads/images/Cevahir-Kuzey/image-2.png',
+      }),
+    );
+    expect(result.count).toBe(2);
+    expect(result.uploads).toHaveLength(2);
+    expect(result.uploads.map((upload) => upload.objectKey)).toEqual([
+      'Construction-Uploads/images/Cevahir-Kuzey/image-1.jpg',
+      'Construction-Uploads/images/Cevahir-Kuzey/image-2.png',
+    ]);
+  });
+
+  it('rejects non-superadmin users for superadmin image uploads', async () => {
+    const { service } = createService();
+
+    await expect(
+      service.initImageUploadsAsSuperadmin(uploadUser, {
+        projectName: 'Cevahir Kuzey',
+        files: [
+          {
+            fileName: 'image-1.jpg',
+            fileSize: 2048,
+            contentType: 'image/jpeg',
+          },
+        ],
+      }),
+    ).rejects.toBeInstanceOf(ForbiddenException);
   });
 });

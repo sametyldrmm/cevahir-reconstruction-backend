@@ -21,14 +21,21 @@ import {
   ApiQuery,
   ApiBearerAuth,
 } from '@nestjs/swagger';
+import { PAGE_PERMISSIONS } from '../../../access/domain/permission.constants';
+import {
+  AdminOnly,
+  PagePermissions,
+} from '../../decorators/public.decorator';
 import {
   EventBridgeCronService,
   CronJobConfig,
 } from './eventbridge-cron.service';
 
 @ApiTags('EventBridge')
-@ApiBearerAuth('JWT-auth')
+@ApiBearerAuth('JWT')
 @Controller('eventbridge')
+@AdminOnly()
+@PagePermissions(PAGE_PERMISSIONS.SYSTEM_EVENTBRIDGE)
 export class EventBridgeController {
   constructor(
     private readonly eventBridgeCronService: EventBridgeCronService,

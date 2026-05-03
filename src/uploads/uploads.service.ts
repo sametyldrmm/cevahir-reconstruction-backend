@@ -10,8 +10,13 @@ import { randomUUID } from 'crypto';
 import { In, LessThanOrEqual, Repository } from 'typeorm';
 import type { JwtUserShape } from '../access/access-policy.service';
 import { S3Service } from '../common/aws/s3/s3.service';
+import { isAdminLikeRole, isUploadRole } from '../users/domain/user-role.constants';
 import { AbortUploadDto } from './dto/abort-upload.dto';
 import { CompleteUploadDto } from './dto/complete-upload.dto';
+import {
+  InitImageUploadItemDto,
+  InitImageUploadsDto,
+} from './dto/init-image-uploads.dto';
 import { InitUploadDto } from './dto/init-upload.dto';
 import { SignPartDto } from './dto/sign-part.dto';
 import {
@@ -37,7 +42,60 @@ export class UploadsService {
 
   async initUpload(user: JwtUserShape, body: InitUploadDto) {
     this.assertUploadUser(user);
+    return this.createUploadSession(user, body, 'files');
+  }
 
+  async initImageUploadsAsSuperadmin(
+    user: JwtUserShape,
+    body: InitImageUploadsDto,
+  ) {
+    this.assertSuperAdminUser(user);
+
+    const uploads: Array<Awaited<ReturnType<UploadsService['createUploadSession']>>> =
+      [];
+    for (const file of body.files) {
+      uploads.push(
+        await this.createUploadSession(user, file, 'images', body.projectName),
+      );
+    }
+
+    return {
+      count: uploads.length,
+      uploads,
+    };
+  }
+
+  async signPartsAsSuperadmin(user: JwtUserShape, body: SignPartDto) {
+    this.assertSuperAdminUser(user);
+    return this.signPartsInternal(user, body);
+  }
+
+  async completeUploadAsSuperadmin(user: JwtUserShape, body: CompleteUploadDto) {
+    this.assertSuperAdminUser(user);
+    return this.completeUploadInternal(user, body);
+  }
+
+  async abortUploadAsSuperadmin(user: JwtUserShape, body: AbortUploadDto) {
+    this.assertSuperAdminUser(user);
+    return this.abortUploadInternal(user, body);
+  }
+
+  async getStatusAsSuperadmin(user: JwtUserShape, sessionId: string) {
+    this.assertSuperAdminUser(user);
+    return this.getStatusInternal(user, sessionId);
+  }
+
+  async listActiveUploadsAsSuperadmin(user: JwtUserShape) {
+    this.assertSuperAdminUser(user);
+    return this.listActiveUploadsInternal(user);
+  }
+
+  private async createUploadSession(
+    user: JwtUserShape,
+    body: InitUploadDto | InitImageUploadItemDto,
+    uploadArea: 'files' | 'images',
+    projectName?: string,
+  ) {
     const fileName = body.fileName.trim();
     if (!fileName) {
       throw new BadRequestException('fileName is required');
@@ -49,7 +107,12 @@ export class UploadsService {
     const sessionId = randomUUID();
     const now = new Date();
     const partSize = this.calculatePartSize(body.fileSize);
-    const objectKey = this.buildObjectKey(user, body.fileName);
+    const objectKey = this.buildObjectKey(
+      user,
+      body.fileName,
+      uploadArea,
+      projectName,
+    );
     const bucketName = this.getBucketName();
     if (!bucketName) {
       throw new BadRequestException('AWS_S3_BUCKET_NAME is not configured');
@@ -97,6 +160,10 @@ export class UploadsService {
 
   async signParts(user: JwtUserShape, body: SignPartDto) {
     this.assertUploadUser(user);
+    return this.signPartsInternal(user, body);
+  }
+
+  private async signPartsInternal(user: JwtUserShape, body: SignPartDto) {
     const session = await this.getOwnedSession(user.id, body.sessionId);
 
     if (this.isTerminalStatus(session.status)) {
@@ -134,6 +201,10 @@ export class UploadsService {
 
   async completeUpload(user: JwtUserShape, body: CompleteUploadDto) {
     this.assertUploadUser(user);
+    return this.completeUploadInternal(user, body);
+  }
+
+  private async completeUploadInternal(user: JwtUserShape, body: CompleteUploadDto) {
     const session = await this.getOwnedSession(user.id, body.sessionId);
 
     if (session.status === UploadSessionStatus.COMPLETED) {
@@ -169,6 +240,10 @@ export class UploadsService {
 
   async abortUpload(user: JwtUserShape, body: AbortUploadDto) {
     this.assertUploadUser(user);
+    return this.abortUploadInternal(user, body);
+  }
+
+  private async abortUploadInternal(user: JwtUserShape, body: AbortUploadDto) {
     const session = await this.getOwnedSession(user.id, body.sessionId);
 
     if (session.status === UploadSessionStatus.COMPLETED) {
@@ -190,6 +265,10 @@ export class UploadsService {
 
   async getStatus(user: JwtUserShape, sessionId: string) {
     this.assertUploadUser(user);
+    return this.getStatusInternal(user, sessionId);
+  }
+
+  private async getStatusInternal(user: JwtUserShape, sessionId: string) {
     const session = await this.getOwnedSession(user.id, sessionId);
 
     if (session.status === UploadSessionStatus.COMPLETED) {
@@ -211,6 +290,10 @@ export class UploadsService {
 
   async listActiveUploads(user: JwtUserShape) {
     this.assertUploadUser(user);
+    return this.listActiveUploadsInternal(user);
+  }
+
+  private async listActiveUploadsInternal(user: JwtUserShape) {
     const sessions = await this.sessions.find({
       where: {
         userId: user.id,
@@ -330,10 +413,17 @@ export class UploadsService {
   private buildObjectKey(
     user: JwtUserShape,
     fileName: string,
+    uploadArea: 'files' | 'images',
+    projectName?: string,
   ) {
-    const normalizedEmail = this.normalizeUploaderEmail(user.email);
     const exactFileName = this.normalizeObjectFileName(fileName);
 
+    if (uploadArea === 'images') {
+      const normalizedProjectName = this.normalizeProjectName(projectName);
+      return `Construction-Uploads/images/${normalizedProjectName}/${exactFileName}`;
+    }
+
+    const normalizedEmail = this.normalizeUploaderEmail(user.email);
     return `Construction-Uploads/${normalizedEmail}/${exactFileName}`;
   }
 
@@ -426,6 +516,18 @@ export class UploadsService {
       ?.trim() || 'unnamed-file';
   }
 
+  private normalizeProjectName(projectName?: string) {
+    const normalized = this.sanitizePathSegment(projectName ?? '').replace(
+      /\//g,
+      '-',
+    );
+    if (!normalized) {
+      throw new BadRequestException('projectName is required');
+    }
+
+    return normalized;
+  }
+
   private async abortSessionOnS3(session: UploadSession) {
     try {
       await this.s3.abortMultipartUpload({
@@ -449,8 +551,20 @@ export class UploadsService {
   }
 
   private assertUploadUser(user: JwtUserShape) {
-    if (String(user.role).toUpperCase() !== 'UPLOAD') {
+    if (!isUploadRole(user.role) && !isAdminLikeRole(user.role)) {
       throw new ForbiddenException('Upload access required');
+    }
+    if (!user.email?.trim()) {
+      throw new ForbiddenException('Email is required for uploads');
+    }
+    if (!user.organizationId) {
+      throw new ForbiddenException('Organization is required for uploads');
+    }
+  }
+
+  private assertSuperAdminUser(user: JwtUserShape) {
+    if (String(user.role).toUpperCase() !== 'SUPERADMIN') {
+      throw new ForbiddenException('Superadmin access required');
     }
     if (!user.email?.trim()) {
       throw new ForbiddenException('Email is required for uploads');

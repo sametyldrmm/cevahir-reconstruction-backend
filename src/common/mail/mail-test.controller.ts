@@ -24,7 +24,11 @@ import {
 } from 'class-validator';
 import { MailService } from './mail.service';
 import { MailTemplate } from './mail.types';
-import { JwtAuthGuard } from '../jwt/jwt-auth.guard';
+import { PAGE_PERMISSIONS } from '../../access/domain/permission.constants';
+import {
+  AdminOnly,
+  PagePermissions,
+} from '../decorators/public.decorator';
 
 export class SendEmailDto {
   @IsEmail()
@@ -185,8 +189,9 @@ export class SendTemplateEmailDto {
 }
 
 @ApiTags('Mail Test')
-@ApiBearerAuth('JWT-auth')
-@UseGuards(JwtAuthGuard)
+@ApiBearerAuth('JWT')
+@AdminOnly()
+@PagePermissions(PAGE_PERMISSIONS.SYSTEM_MAIL)
 @Controller('mail-test')
 export class MailTestController {
   private readonly logger = new Logger(MailTestController.name);

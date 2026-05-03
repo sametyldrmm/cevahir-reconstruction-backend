@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from '../users/users.module';
+import { Organization } from '../organizations/entities/organization.entity';
 import { Project } from '../projects/entities/project.entity';
 import { UserProjectAccess } from '../projects/entities/user-project-access.entity';
 import { VisibilityProfile } from '../projects/entities/visibility-profile.entity';
@@ -11,6 +12,7 @@ import { AccessPolicyService } from './access-policy.service';
   imports: [
     UsersModule,
     TypeOrmModule.forFeature([
+      Organization,
       UserProjectAccess,
       Project,
       Worksite,

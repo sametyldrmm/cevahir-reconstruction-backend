@@ -22,11 +22,14 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    const effectivePagePermissions =
+      this.usersService.getEffectivePagePermissionsForUser(user);
     const tokens = this.jwt.generateTokenPair({
       id: user.id,
       email: user.email,
       role: user.role,
       organizationId: user.organizationId,
+      pagePermissions: effectivePagePermissions,
     });
 
     return {
@@ -38,6 +41,7 @@ export class AuthService {
         role: user.role,
         sessionVersion: user.sessionVersion,
         organizationId: user.organizationId,
+        pagePermissions: effectivePagePermissions,
       },
     };
   }

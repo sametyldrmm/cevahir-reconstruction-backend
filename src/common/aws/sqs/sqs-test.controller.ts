@@ -14,14 +14,21 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { Logger } from '@nestjs/common';
+import { PAGE_PERMISSIONS } from '../../../access/domain/permission.constants';
+import {
+  AdminOnly,
+  PagePermissions,
+} from '../../decorators/public.decorator';
 import { SqsService } from './sqs.service';
 import { SqsListenerService } from './sqs-listener.service';
 import { ConfigService } from '@nestjs/config';
 import { SendMessageDto, SendAnlikGpsMessageDto } from './dto/send-message.dto';
 
 @ApiTags('SQS Test')
-@ApiBearerAuth('JWT-auth')
+@ApiBearerAuth('JWT')
 @Controller('sqs-test')
+@AdminOnly()
+@PagePermissions(PAGE_PERMISSIONS.SYSTEM_SQS)
 export class SqsTestController {
   private readonly queueUrl: string;
   private readonly logger = new Logger(SqsTestController.name);

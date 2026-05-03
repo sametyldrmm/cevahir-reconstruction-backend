@@ -1,10 +1,17 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { PAGE_PERMISSIONS } from '../../access/domain/permission.constants';
+import {
+  AdminOnly,
+  PagePermissions,
+} from '../decorators/public.decorator';
 import { RedisConnectionService } from './redis-connection.service';
 import { QueueNames } from './queue.types';
 
 @ApiTags('queue-health')
 @Controller('queue-health')
+@AdminOnly()
+@PagePermissions(PAGE_PERMISSIONS.SYSTEM_QUEUES)
 export class QueueHealthController {
   constructor(
     private readonly redisConnectionService: RedisConnectionService,

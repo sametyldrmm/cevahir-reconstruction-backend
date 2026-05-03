@@ -1,5 +1,15 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsOptional, IsString, IsUUID, MinLength } from 'class-validator';
+import { Transform } from 'class-transformer';
+import {
+  ArrayUnique,
+  IsArray,
+  IsEmail,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MinLength,
+} from 'class-validator';
+import { toStringArray } from '../../common/transforms/to-string-array';
 
 export class CreateUserDto {
   @ApiProperty({ example: 'user@firma.com' })
@@ -19,4 +29,15 @@ export class CreateUserDto {
   @IsOptional()
   @IsString()
   role?: string;
+
+  @ApiPropertyOptional({
+    example: ['dashboard.view', 'blocks.view'],
+    type: [String],
+  })
+  @Transform(({ value }) => toStringArray(value))
+  @IsOptional()
+  @IsArray()
+  @ArrayUnique()
+  @IsString({ each: true })
+  pagePermissions?: string[];
 }
