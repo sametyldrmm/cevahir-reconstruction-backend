@@ -7,6 +7,7 @@ import { UploadSession, UploadSessionStatus } from './entities/upload-session.en
 import { UploadsService } from './uploads.service';
 
 describe('UploadsService', () => {
+  const fixedNow = new Date('2026-05-03T18:23:22.000Z');
   const uploadUser = {
     id: '4dbcfca0-888d-4581-9329-66733897b4dc',
     email: 'Upload.User@Example.com',
@@ -70,6 +71,11 @@ describe('UploadsService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.useFakeTimers().setSystemTime(fixedNow);
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   it('aborts an active upload session for the current upload user', async () => {
@@ -172,14 +178,15 @@ describe('UploadsService', () => {
     });
   });
 
-  it('stores uploads under Construction-Uploads/<normalized-email>/<exact-file-name>', async () => {
+  it('stores uploads under Construction-Uploads/UserUploads/<normalized-email>/<Date>/<exact-file-name>', async () => {
     const { service, repo, s3 } = createService({
       AWS_S3_BUCKET_NAME: 'uploads-bucket',
       UPLOAD_SESSION_TTL_MS: 60000,
     });
     s3.createMultipartUpload.mockResolvedValue({
       uploadId: 'multipart-upload-id',
-      key: 'Construction-Uploads/upload.user@example.com/My Report Final.zip',
+      key:
+        'Construction-Uploads/UserUploads/upload.user@example.com/2026-05-03/My Report Final.zip',
     });
 
     const result = await service.initUpload(uploadUser, {
@@ -192,17 +199,18 @@ describe('UploadsService', () => {
 
     expect(s3.createMultipartUpload).toHaveBeenCalledWith(
       expect.objectContaining({
-        key: 'Construction-Uploads/upload.user@example.com/My Report Final.zip',
+        key:
+          'Construction-Uploads/UserUploads/upload.user@example.com/2026-05-03/My Report Final.zip',
       }),
     );
     expect(repo.save).toHaveBeenCalledWith(
       expect.objectContaining({
         objectKey:
-          'Construction-Uploads/upload.user@example.com/My Report Final.zip',
+          'Construction-Uploads/UserUploads/upload.user@example.com/2026-05-03/My Report Final.zip',
       }),
     );
     expect(result.objectKey).toBe(
-      'Construction-Uploads/upload.user@example.com/My Report Final.zip',
+      'Construction-Uploads/UserUploads/upload.user@example.com/2026-05-03/My Report Final.zip',
     );
   });
 
@@ -213,7 +221,8 @@ describe('UploadsService', () => {
     });
     s3.createMultipartUpload.mockResolvedValue({
       uploadId: 'multipart-upload-id',
-      key: 'Construction-Uploads/super.admin@example.com/My Report Final.zip',
+      key:
+        'Construction-Uploads/UserUploads/super.admin@example.com/2026-05-03/My Report Final.zip',
     });
 
     const result = await service.initUpload(superadminUser, {
@@ -227,15 +236,15 @@ describe('UploadsService', () => {
     expect(repo.save).toHaveBeenCalledWith(
       expect.objectContaining({
         objectKey:
-          'Construction-Uploads/super.admin@example.com/My Report Final.zip',
+          'Construction-Uploads/UserUploads/super.admin@example.com/2026-05-03/My Report Final.zip',
       }),
     );
     expect(result.objectKey).toBe(
-      'Construction-Uploads/super.admin@example.com/My Report Final.zip',
+      'Construction-Uploads/UserUploads/super.admin@example.com/2026-05-03/My Report Final.zip',
     );
   });
 
-  it('creates superadmin image upload sessions under Construction-Uploads/images/<projectName>/', async () => {
+  it('creates superadmin image upload sessions under Construction-Uploads/AdminUploads/<projectName>/<Date>/', async () => {
     const { service, repo, s3 } = createService({
       AWS_S3_BUCKET_NAME: 'uploads-bucket',
       UPLOAD_SESSION_TTL_MS: 60000,
@@ -243,11 +252,13 @@ describe('UploadsService', () => {
     s3.createMultipartUpload
       .mockResolvedValueOnce({
         uploadId: 'multipart-upload-id-1',
-        key: 'Construction-Uploads/images/Cevahir-Kuzey/image-1.jpg',
+        key:
+          'Construction-Uploads/AdminUploads/Cevahir-Kuzey/2026-05-03/image-1.jpg',
       })
       .mockResolvedValueOnce({
         uploadId: 'multipart-upload-id-2',
-        key: 'Construction-Uploads/images/Cevahir-Kuzey/image-2.png',
+        key:
+          'Construction-Uploads/AdminUploads/Cevahir-Kuzey/2026-05-03/image-2.png',
       });
 
     const result = await service.initImageUploadsAsSuperadmin(superadminUser, {
@@ -269,20 +280,22 @@ describe('UploadsService', () => {
     expect(s3.createMultipartUpload).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
-        key: 'Construction-Uploads/images/Cevahir-Kuzey/image-1.jpg',
+        key:
+          'Construction-Uploads/AdminUploads/Cevahir-Kuzey/2026-05-03/image-1.jpg',
       }),
     );
     expect(s3.createMultipartUpload).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
-        key: 'Construction-Uploads/images/Cevahir-Kuzey/image-2.png',
+        key:
+          'Construction-Uploads/AdminUploads/Cevahir-Kuzey/2026-05-03/image-2.png',
       }),
     );
     expect(result.count).toBe(2);
     expect(result.uploads).toHaveLength(2);
     expect(result.uploads.map((upload) => upload.objectKey)).toEqual([
-      'Construction-Uploads/images/Cevahir-Kuzey/image-1.jpg',
-      'Construction-Uploads/images/Cevahir-Kuzey/image-2.png',
+      'Construction-Uploads/AdminUploads/Cevahir-Kuzey/2026-05-03/image-1.jpg',
+      'Construction-Uploads/AdminUploads/Cevahir-Kuzey/2026-05-03/image-2.png',
     ]);
   });
 

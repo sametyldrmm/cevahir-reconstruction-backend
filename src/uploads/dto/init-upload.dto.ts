@@ -18,7 +18,8 @@ export class InitUploadDto {
 
   @ApiPropertyOptional({
     example: 'raw',
-    description: 'Optional logical prefix below the uploads root.',
+    description:
+      'Optional client-side grouping hint. The backend still generates the final S3 key as Construction-Uploads/UserUploads/<email>/<Date>/<file-name>.',
   })
   @IsOptional()
   @IsString()

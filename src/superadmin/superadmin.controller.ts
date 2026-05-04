@@ -293,7 +293,7 @@ export class SuperadminController {
   @Post('uploads/images/init')
   @ApiOperation({
     summary:
-      'Create multipart upload sessions for many images under Construction-Uploads/images/<projectName>',
+      'Create multipart upload sessions for many images under Construction-Uploads/AdminUploads/<projectName>/<Date>',
   })
   @ApiBody({ type: InitImageUploadsDto })
   @ApiCreatedResponse({ type: ImageUploadBatchInitResponseDto })

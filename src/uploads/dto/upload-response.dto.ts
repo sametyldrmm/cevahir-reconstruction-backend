@@ -36,7 +36,7 @@ export class MultipartCompleteResultDto {
 
   @ApiProperty({
     example:
-      'Construction-Uploads/uploader@example.com/site-report-001.zip',
+      'Construction-Uploads/UserUploads/uploader@example.com/2026-05-04/site-report-001.zip',
   })
   key: string;
 
@@ -48,7 +48,7 @@ export class MultipartCompleteResultDto {
 
   @ApiProperty({
     example:
-      'https://uploads-bucket.s3.eu-central-1.amazonaws.com/Construction-Uploads/uploader@example.com/site-report-001.zip',
+      'https://uploads-bucket.s3.eu-central-1.amazonaws.com/Construction-Uploads/UserUploads/uploader@example.com/2026-05-04/site-report-001.zip',
     required: false,
   })
   location?: string;
@@ -66,7 +66,7 @@ export class UploadInitResponseDto {
 
   @ApiProperty({
     example:
-      'Construction-Uploads/uploader@example.com/site-report-001.zip',
+      'Construction-Uploads/UserUploads/uploader@example.com/2026-05-04/site-report-001.zip',
   })
   objectKey: string;
 
@@ -92,7 +92,13 @@ export class UploadInitResponseDto {
   expiresAt: Date;
 }
 
-export class ImageUploadInitItemDto extends UploadInitResponseDto {}
+export class ImageUploadInitItemDto extends UploadInitResponseDto {
+  @ApiProperty({
+    example:
+      'Construction-Uploads/AdminUploads/Cevahir-Kuzey/2026-05-04/site-photo-001.jpg',
+  })
+  declare objectKey: string;
+}
 
 export class ImageUploadBatchInitResponseDto {
   @ApiProperty({ example: 2 })
@@ -111,7 +117,7 @@ export class UploadSignPartResponseDto {
 
   @ApiProperty({
     example:
-      'Construction-Uploads/uploader@example.com/site-report-001.zip',
+      'Construction-Uploads/UserUploads/uploader@example.com/2026-05-04/site-report-001.zip',
   })
   objectKey: string;
 
@@ -131,7 +137,7 @@ export class UploadAbortResponseDto {
 
   @ApiProperty({
     example:
-      'Construction-Uploads/uploader@example.com/site-report-001.zip',
+      'Construction-Uploads/UserUploads/uploader@example.com/2026-05-04/site-report-001.zip',
   })
   objectKey: string;
 
@@ -164,7 +170,7 @@ export class UploadStatusResponseDto {
 
   @ApiProperty({
     example:
-      'Construction-Uploads/uploader@example.com/site-report-001.zip',
+      'Construction-Uploads/UserUploads/uploader@example.com/2026-05-04/site-report-001.zip',
   })
   objectKey: string;
 
@@ -227,7 +233,7 @@ export class ActiveUploadItemDto {
 
   @ApiProperty({
     example:
-      'Construction-Uploads/uploader@example.com/site-report-001.zip',
+      'Construction-Uploads/UserUploads/uploader@example.com/2026-05-04/site-report-001.zip',
   })
   objectKey: string;
 

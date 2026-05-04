@@ -111,6 +111,7 @@ export class UploadsService {
       user,
       body.fileName,
       uploadArea,
+      now,
       projectName,
     );
     const bucketName = this.getBucketName();
@@ -414,17 +415,19 @@ export class UploadsService {
     user: JwtUserShape,
     fileName: string,
     uploadArea: 'files' | 'images',
+    now: Date,
     projectName?: string,
   ) {
     const exactFileName = this.normalizeObjectFileName(fileName);
+    const dateSegment = this.buildDateSegment(now);
 
     if (uploadArea === 'images') {
       const normalizedProjectName = this.normalizeProjectName(projectName);
-      return `Construction-Uploads/images/${normalizedProjectName}/${exactFileName}`;
+      return `Construction-Uploads/AdminUploads/${normalizedProjectName}/${dateSegment}/${exactFileName}`;
     }
 
     const normalizedEmail = this.normalizeUploaderEmail(user.email);
-    return `Construction-Uploads/${normalizedEmail}/${exactFileName}`;
+    return `Construction-Uploads/UserUploads/${normalizedEmail}/${dateSegment}/${exactFileName}`;
   }
 
   private calculatePartSize(fileSize: number) {
@@ -526,6 +529,10 @@ export class UploadsService {
     }
 
     return normalized;
+  }
+
+  private buildDateSegment(now: Date) {
+    return now.toISOString().slice(0, 10);
   }
 
   private async abortSessionOnS3(session: UploadSession) {
