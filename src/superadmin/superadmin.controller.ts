@@ -36,6 +36,10 @@ import { UpdatePagePermissionsDto } from '../admin/dto/update-page-permissions.d
 import { SuperAdminOnly } from '../common/decorators/public.decorator';
 import { User } from '../common/decorators/user.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  getProgressToday,
+  normalizeProgressDataDate,
+} from '../progress/progress-date.utils';
 import { ProgressDataService } from '../progress/progress-data.service';
 import { AbortUploadDto } from '../uploads/dto/abort-upload.dto';
 import { CompleteUploadDto } from '../uploads/dto/complete-upload.dto';
@@ -293,7 +297,7 @@ export class SuperadminController {
   @Post('uploads/images/init')
   @ApiOperation({
     summary:
-      'Create multipart upload sessions for many images under Construction-Uploads/AdminUploads/<projectName>/<Date>',
+      'Create multipart upload sessions for many images under Construction-Uploads/AdminUploads/<projectName>/<worksiteName>/<blockName>/<Date>',
   })
   @ApiBody({ type: InitImageUploadsDto })
   @ApiCreatedResponse({ type: ImageUploadBatchInitResponseDto })
@@ -395,6 +399,12 @@ export class SuperadminController {
           type: 'string',
           example: 'Cevahir Kuzey',
         },
+        dataDate: {
+          type: 'string',
+          example: '2026-05-10',
+          description:
+            'Optional import date in YYYY-MM-DD format. When provided, only that date slice is replaced.',
+        },
         file: {
           type: 'string',
           format: 'binary',
@@ -412,6 +422,7 @@ export class SuperadminController {
           originalname: string;
         }
       | undefined,
+    @Body('dataDate') dataDate?: string,
   ) {
     if (!file?.buffer?.length) {
       throw new BadRequestException('file is required');
@@ -422,10 +433,13 @@ export class SuperadminController {
       projectName,
     );
     const worksite = await this.superadmin.ensureDefaultWorksite(project.id);
+    const normalizedDataDate =
+      normalizeProgressDataDate(dataDate) ?? getProgressToday();
     const result = await this.progressData.replaceProjectBlocksFromUploadedJson(
       project.id,
       file.buffer,
       file.originalname,
+      normalizedDataDate,
     );
 
     return {
@@ -438,6 +452,7 @@ export class SuperadminController {
         code: worksite.code,
         name: worksite.name,
       },
+      dataDate: normalizedDataDate,
       ...result,
     };
   }

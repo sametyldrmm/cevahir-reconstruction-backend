@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import type { JwtUserShape } from '../access/access-policy.service';
 import { S3Service } from '../common/aws/s3/s3.service';
+import { type InitImageUploadsDto } from './dto/init-image-uploads.dto';
 import { UploadSession, UploadSessionStatus } from './entities/upload-session.entity';
 import { UploadsService } from './uploads.service';
 
@@ -244,7 +245,7 @@ describe('UploadsService', () => {
     );
   });
 
-  it('creates superadmin image upload sessions under Construction-Uploads/AdminUploads/<projectName>/<Date>/', async () => {
+  it('creates superadmin image upload sessions under Construction-Uploads/AdminUploads/<projectName>/<worksiteName>/<blockName>/<Date>/', async () => {
     const { service, repo, s3 } = createService({
       AWS_S3_BUCKET_NAME: 'uploads-bucket',
       UPLOAD_SESSION_TTL_MS: 60000,
@@ -253,16 +254,18 @@ describe('UploadsService', () => {
       .mockResolvedValueOnce({
         uploadId: 'multipart-upload-id-1',
         key:
-          'Construction-Uploads/AdminUploads/Cevahir-Kuzey/2026-05-03/image-1.jpg',
+          'Construction-Uploads/AdminUploads/Cevahir-Kuzey/North-Site/Block-A/2026-05-03/image-1.jpg',
       })
       .mockResolvedValueOnce({
         uploadId: 'multipart-upload-id-2',
         key:
-          'Construction-Uploads/AdminUploads/Cevahir-Kuzey/2026-05-03/image-2.png',
+          'Construction-Uploads/AdminUploads/Cevahir-Kuzey/North-Site/Block-A/2026-05-03/image-2.png',
       });
 
     const result = await service.initImageUploadsAsSuperadmin(superadminUser, {
       projectName: 'Cevahir Kuzey',
+      worksiteName: 'North Site',
+      blockName: 'Block A',
       files: [
         {
           fileName: 'image-1.jpg',
@@ -281,22 +284,74 @@ describe('UploadsService', () => {
       1,
       expect.objectContaining({
         key:
-          'Construction-Uploads/AdminUploads/Cevahir-Kuzey/2026-05-03/image-1.jpg',
+          'Construction-Uploads/AdminUploads/Cevahir-Kuzey/North-Site/Block-A/2026-05-03/image-1.jpg',
       }),
     );
     expect(s3.createMultipartUpload).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
         key:
-          'Construction-Uploads/AdminUploads/Cevahir-Kuzey/2026-05-03/image-2.png',
+          'Construction-Uploads/AdminUploads/Cevahir-Kuzey/North-Site/Block-A/2026-05-03/image-2.png',
       }),
     );
     expect(result.count).toBe(2);
     expect(result.uploads).toHaveLength(2);
     expect(result.uploads.map((upload) => upload.objectKey)).toEqual([
-      'Construction-Uploads/AdminUploads/Cevahir-Kuzey/2026-05-03/image-1.jpg',
-      'Construction-Uploads/AdminUploads/Cevahir-Kuzey/2026-05-03/image-2.png',
+      'Construction-Uploads/AdminUploads/Cevahir-Kuzey/North-Site/Block-A/2026-05-03/image-1.jpg',
+      'Construction-Uploads/AdminUploads/Cevahir-Kuzey/North-Site/Block-A/2026-05-03/image-2.png',
     ]);
+  });
+
+  it('rejects superadmin image upload init when worksiteName is missing', async () => {
+    const { service } = createService({
+      AWS_S3_BUCKET_NAME: 'uploads-bucket',
+      UPLOAD_SESSION_TTL_MS: 60000,
+    });
+
+    const body: Partial<InitImageUploadsDto> = {
+      projectName: 'Cevahir Kuzey',
+      blockName: 'Block A',
+      files: [
+        {
+          fileName: 'image-1.jpg',
+          fileSize: 2048,
+          contentType: 'image/jpeg',
+        },
+      ],
+    };
+
+    await expect(
+      service.initImageUploadsAsSuperadmin(
+        superadminUser,
+        body as InitImageUploadsDto,
+      ),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('rejects superadmin image upload init when blockName is missing', async () => {
+    const { service } = createService({
+      AWS_S3_BUCKET_NAME: 'uploads-bucket',
+      UPLOAD_SESSION_TTL_MS: 60000,
+    });
+
+    const body: Partial<InitImageUploadsDto> = {
+      projectName: 'Cevahir Kuzey',
+      worksiteName: 'North Site',
+      files: [
+        {
+          fileName: 'image-1.jpg',
+          fileSize: 2048,
+          contentType: 'image/jpeg',
+        },
+      ],
+    };
+
+    await expect(
+      service.initImageUploadsAsSuperadmin(
+        superadminUser,
+        body as InitImageUploadsDto,
+      ),
+    ).rejects.toBeInstanceOf(BadRequestException);
   });
 
   it('rejects non-superadmin users for superadmin image uploads', async () => {
@@ -305,6 +360,8 @@ describe('UploadsService', () => {
     await expect(
       service.initImageUploadsAsSuperadmin(uploadUser, {
         projectName: 'Cevahir Kuzey',
+        worksiteName: 'North Site',
+        blockName: 'Block A',
         files: [
           {
             fileName: 'image-1.jpg',

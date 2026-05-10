@@ -12,7 +12,7 @@ import { Project } from '../../projects/entities/project.entity';
 import type { GroupData } from '../domain/progress.types';
 
 @Entity('project_progress_blocks')
-@Unique(['projectId', 'blockName'])
+@Unique(['projectId', 'blockName', 'dataDate'])
 export class ProjectProgressBlock {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -26,6 +26,9 @@ export class ProjectProgressBlock {
 
   @Column({ name: 'block_name', length: 64 })
   blockName: string;
+
+  @Column({ name: 'data_date', type: 'date', nullable: true })
+  dataDate: string | null;
 
   @Column({ name: 'required_data', type: 'jsonb', nullable: true })
   requiredData: GroupData | null;

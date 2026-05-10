@@ -3,13 +3,22 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as fs from 'fs';
 import * as path from 'path';
-import { In, Repository } from 'typeorm';
+import { Between, In, Repository } from 'typeorm';
 import type { ConstructionSummary, GroupData } from './domain/progress.types';
 import { ProjectProgressBlock } from './entities/project-progress-block.entity';
+import {
+  normalizeProgressDataDate,
+  type ProgressDateRange,
+} from './progress-date.utils';
 
 interface ProjectBlockImportPayload {
   required?: Record<string, GroupData>;
   built?: Record<string, GroupData>;
+}
+
+interface LoadSummaryOptions {
+  blockNames?: string[];
+  dateRange?: Omit<ProgressDateRange, 'period'>;
 }
 
 @Injectable()
@@ -30,23 +39,30 @@ export class ProgressDataService {
 
   async loadSummary(
     projectId: string,
-    blockNames?: string[],
+    options?: LoadSummaryOptions,
   ): Promise<ConstructionSummary> {
-    const rows = await this.findProjectBlocks(projectId, blockNames);
-    if (rows.length > 0) {
-      return this.buildSummaryFromRows(rows);
+    const requiredRows = await this.findProjectBlocks(projectId, options?.blockNames);
+    const builtRows = this.selectBuiltRowsForAggregation(
+      await this.findProjectBlocks(
+        projectId,
+        options?.blockNames,
+        options?.dateRange,
+      ),
+      Boolean(options?.dateRange),
+    );
+
+    if (requiredRows.length > 0 || builtRows.length > 0) {
+      return this.buildSummaryFromRows(requiredRows, builtRows);
     }
 
-    const filePath = this.resolvePath(
-      'PROGRESS_SUMMARY_PATH',
-      'data/progress_summary.json',
-    );
-    if (!fs.existsSync(filePath)) {
-      throw new Error(`progress summary not found: ${filePath}`);
+    const fallback = this.loadSummaryRoot();
+    if (!options?.dateRange) {
+      return this.sliceSummaryBlocks(fallback, options?.blockNames);
     }
-    return JSON.parse(
-      fs.readFileSync(filePath, 'utf8'),
-    ) as ConstructionSummary;
+
+    return this.zeroBuiltSummary(
+      this.sliceSummaryBlocks(fallback, options?.blockNames),
+    );
   }
 
   async loadDetailBlock(
@@ -69,6 +85,7 @@ export class ProgressDataService {
   async replaceProjectBlocksFromFile(
     projectId: string,
     sourcePath?: string,
+    dataDate?: string | null,
   ): Promise<{ importedBlockCount: number; sourcePath: string }> {
     const resolvedPath = this.resolvePath(
       'PROJECT_BLOCK_IMPORT_PATH',
@@ -79,7 +96,11 @@ export class ProgressDataService {
     }
 
     const raw = JSON.parse(fs.readFileSync(resolvedPath, 'utf8')) as ProjectBlockImportPayload;
-    const importedBlockCount = await this.replaceProjectBlocks(projectId, raw);
+    const importedBlockCount = await this.replaceProjectBlocks(
+      projectId,
+      raw,
+      dataDate,
+    );
     return { importedBlockCount, sourcePath: resolvedPath };
   }
 
@@ -87,9 +108,14 @@ export class ProgressDataService {
     projectId: string,
     fileBuffer: Buffer,
     fileName?: string,
+    dataDate?: string | null,
   ): Promise<{ importedBlockCount: number; sourceFileName: string | null }> {
     const payload = this.parseProjectBlockPayload(fileBuffer);
-    const importedBlockCount = await this.replaceProjectBlocks(projectId, payload);
+    const importedBlockCount = await this.replaceProjectBlocks(
+      projectId,
+      payload,
+      dataDate,
+    );
 
     return {
       importedBlockCount,
@@ -100,8 +126,10 @@ export class ProgressDataService {
   async replaceProjectBlocks(
     projectId: string,
     payload: ProjectBlockImportPayload,
+    dataDate?: string | null,
   ): Promise<number> {
     const normalized = this.normalizePayload(payload);
+    const normalizedDataDate = normalizeProgressDataDate(dataDate);
     const blockNames = new Set([
       ...Object.keys(normalized.required),
       ...Object.keys(normalized.built),
@@ -112,12 +140,17 @@ export class ProgressDataService {
         this.blocks.create({
           projectId,
           blockName,
+          dataDate: normalizedDataDate,
           requiredData: normalized.required[blockName] ?? null,
           builtData: normalized.built[blockName] ?? null,
         }),
       );
 
-    await this.blocks.delete({ projectId });
+    if (normalizedDataDate) {
+      await this.blocks.delete({ projectId, dataDate: normalizedDataDate });
+    } else {
+      await this.blocks.delete({ projectId });
+    }
     if (rows.length > 0) {
       await this.blocks.save(rows);
     }
@@ -139,9 +172,22 @@ export class ProgressDataService {
     >;
   }
 
+  private loadSummaryRoot(): ConstructionSummary {
+    const filePath = this.resolvePath(
+      'PROGRESS_SUMMARY_PATH',
+      'data/progress_summary.json',
+    );
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`progress summary not found: ${filePath}`);
+    }
+
+    return JSON.parse(fs.readFileSync(filePath, 'utf8')) as ConstructionSummary;
+  }
+
   private async findProjectBlocks(
     projectId: string,
     blockNames?: string[],
+    dateRange?: Omit<ProgressDateRange, 'period'>,
   ): Promise<ProjectProgressBlock[]> {
     const normalizedNames = blockNames
       ?.map((name) => name.trim())
@@ -153,24 +199,43 @@ export class ProgressDataService {
         ...(normalizedNames?.length
           ? { blockName: In(normalizedNames) }
           : {}),
+        ...(dateRange
+          ? { dataDate: Between(dateRange.from, dateRange.to) }
+          : {}),
       },
       order: {
         blockName: 'ASC',
+        dataDate: 'DESC',
+        updatedAt: 'DESC',
+        createdAt: 'DESC',
       },
     });
   }
 
-  private buildSummaryFromRows(rows: ProjectProgressBlock[]): ConstructionSummary {
+  private buildSummaryFromRows(
+    requiredRows: ProjectProgressBlock[],
+    builtRows: ProjectProgressBlock[],
+  ): ConstructionSummary {
     const required: Record<string, GroupData> = {};
-    const built: Record<string, GroupData> = {};
+    const builtGroups: Record<string, GroupData[]> = {};
 
-    for (const row of rows) {
-      if (row.requiredData) {
+    for (const row of requiredRows) {
+      if (row.requiredData && !required[row.blockName]) {
         required[row.blockName] = structuredClone(row.requiredData);
       }
+    }
+
+    for (const row of builtRows) {
       if (row.builtData) {
-        built[row.blockName] = structuredClone(row.builtData);
+        const bucket = builtGroups[row.blockName] ?? [];
+        bucket.push(structuredClone(row.builtData));
+        builtGroups[row.blockName] = bucket;
       }
+    }
+
+    const built: Record<string, GroupData> = {};
+    for (const [blockName, groups] of Object.entries(builtGroups)) {
+      built[blockName] = this.aggregate(groups);
     }
 
     return {
@@ -218,6 +283,82 @@ export class ProgressDataService {
     } catch (error) {
       throw new BadRequestException('Uploaded file must be a valid JSON object');
     }
+  }
+
+  private selectBuiltRowsForAggregation(
+    rows: ProjectProgressBlock[],
+    hasDateFilter: boolean,
+  ): ProjectProgressBlock[] {
+    const builtRows = rows.filter((row) => row.builtData != null);
+    if (hasDateFilter) {
+      return builtRows;
+    }
+
+    const selected: ProjectProgressBlock[] = [];
+    const rowsByBlock = new Map<string, ProjectProgressBlock[]>();
+
+    for (const row of builtRows) {
+      const bucket = rowsByBlock.get(row.blockName) ?? [];
+      bucket.push(row);
+      rowsByBlock.set(row.blockName, bucket);
+    }
+
+    for (const blockRows of rowsByBlock.values()) {
+      const datedRows = blockRows.filter((row) => row.dataDate != null);
+      selected.push(...(datedRows.length > 0 ? datedRows : blockRows));
+    }
+
+    return selected;
+  }
+
+  private sliceSummaryBlocks(
+    raw: ConstructionSummary,
+    blockNames?: string[],
+  ): ConstructionSummary {
+    const normalizedNames = blockNames
+      ?.map((name) => name.trim())
+      .filter((name) => name.length > 0);
+    const selectedBlocks = normalizedNames?.length
+      ? normalizedNames
+      : [...new Set([...Object.keys(raw.required), ...Object.keys(raw.built)])];
+    const required: Record<string, GroupData> = {};
+    const built: Record<string, GroupData> = {};
+
+    for (const blockName of selectedBlocks) {
+      const requiredGroup = raw.required[blockName];
+      const builtGroup = raw.built[blockName];
+      if (requiredGroup) {
+        required[blockName] = structuredClone(requiredGroup);
+      }
+      if (builtGroup) {
+        built[blockName] = structuredClone(builtGroup);
+      }
+    }
+
+    return {
+      required,
+      built,
+      totals: {
+        required: this.aggregate(Object.values(required)),
+        built: this.aggregate(Object.values(built)),
+      },
+    };
+  }
+
+  private zeroBuiltSummary(summary: ConstructionSummary): ConstructionSummary {
+    const built: Record<string, GroupData> = {};
+    for (const blockName of Object.keys(summary.built)) {
+      built[blockName] = this.aggregate([]);
+    }
+
+    return {
+      required: summary.required,
+      built,
+      totals: {
+        required: summary.totals.required,
+        built: this.aggregate([]),
+      },
+    };
   }
 
   private aggregate(groups: GroupData[]): GroupData {

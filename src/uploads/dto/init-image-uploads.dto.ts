@@ -5,6 +5,7 @@ import {
   IsArray,
   IsNumber,
   IsObject,
+  IsNotEmpty,
   IsOptional,
   IsString,
   Max,
@@ -39,8 +40,19 @@ export class InitImageUploadItemDto {
 
 export class InitImageUploadsDto {
   @ApiProperty({ example: 'Cevahir Kuzey' })
+  @IsNotEmpty()
   @IsString()
   projectName: string;
+
+  @ApiProperty({ example: 'North Site' })
+  @IsNotEmpty()
+  @IsString()
+  worksiteName: string;
+
+  @ApiProperty({ example: 'Block A' })
+  @IsNotEmpty()
+  @IsString()
+  blockName: string;
 
   @ApiProperty({ type: [InitImageUploadItemDto] })
   @IsArray()

@@ -95,7 +95,7 @@ export class UploadInitResponseDto {
 export class ImageUploadInitItemDto extends UploadInitResponseDto {
   @ApiProperty({
     example:
-      'Construction-Uploads/AdminUploads/Cevahir-Kuzey/2026-05-04/site-photo-001.jpg',
+      'Construction-Uploads/AdminUploads/Cevahir-Kuzey/North-Site/Block-A/2026-05-04/site-photo-001.jpg',
   })
   declare objectKey: string;
 }

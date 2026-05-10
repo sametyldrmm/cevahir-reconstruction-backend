@@ -16,7 +16,10 @@ import type { JwtUserShape } from '../access/access-policy.service';
 import { AccessPolicyService } from '../access/access-policy.service';
 import { PAGE_PERMISSIONS } from '../access/domain/permission.constants';
 import { CleanLogger } from '../common/logger';
+import { S3Service } from '../common/aws/s3/s3.service';
+import { ProgressSummaryQueryDto } from './dto/progress-summary-query.dto';
 import { ProgressDataService } from './progress-data.service';
+import { resolveProgressDateRange } from './progress-date.utils';
 import { ProgressFilterService } from './progress-filter.service';
 
 @ApiTags('progress')
@@ -29,6 +32,7 @@ export class ProgressController {
     private readonly policy: AccessPolicyService,
     private readonly data: ProgressDataService,
     private readonly filter: ProgressFilterService,
+    private readonly s3: S3Service,
   ) {}
 
   @Get(':worksiteCode/progress/summary')
@@ -42,12 +46,35 @@ export class ProgressController {
     description: 'Virgulle ayrilmis blok isimleri. Bos ise tum gorunur bloklar doner.',
     example: 'A,C1,D2',
   })
+  @ApiQuery({
+    name: 'period',
+    required: false,
+    enum: [
+      'current-month',
+      'current-week',
+      'current-quarter',
+      'current-year',
+      'custom',
+    ],
+  })
+  @ApiQuery({
+    name: 'from',
+    required: false,
+    description: 'YYYY-MM-DD',
+    example: '2026-05-01',
+  })
+  @ApiQuery({
+    name: 'to',
+    required: false,
+    description: 'YYYY-MM-DD',
+    example: '2026-05-10',
+  })
   async summary(
     @User() user: JwtUserShape,
     @Param('worksiteCode') worksiteCode: string,
-    @Query('projectId') projectId: string,
-    @Query('blockNames') blockNames?: string,
+    @Query() query: ProgressSummaryQueryDto,
   ) {
+    const { projectId, blockNames, period, from, to } = query;
     const { worksite, project } = await this.policy.assertWorksiteInProject(
       user.id,
       user.role,
@@ -61,8 +88,17 @@ export class ProgressController {
       projectId,
       worksite.id,
     );
+    const dateRange = resolveProgressDateRange({ period, from, to });
     const requestedBlockIds = this.parseBlockNames(blockNames);
-    const raw = await this.data.loadSummary(projectId, requestedBlockIds ?? undefined);
+    const raw = await this.data.loadSummary(projectId, {
+      blockNames: requestedBlockIds ?? undefined,
+      dateRange: dateRange
+        ? {
+            from: dateRange.from,
+            to: dateRange.to,
+          }
+        : undefined,
+    });
     const filtered = this.filter.filterSummary(
       raw,
       visibility,
@@ -77,6 +113,9 @@ export class ProgressController {
         projectSlug: project.slug,
         worksiteCode,
         requestedBlockIds,
+        period: dateRange?.period ?? null,
+        from: dateRange?.from ?? null,
+        to: dateRange?.to ?? null,
         visibility,
       },
       data: filtered,
@@ -114,6 +153,11 @@ export class ProgressController {
     if (slice == null) {
       throw new NotFoundException('Block not found or not visible for this user');
     }
+    const imageUrls = await this.loadBlockImageUrls(
+      project.name,
+      worksite.code,
+      blockId,
+    );
     this.logger.log(
       `progress.detail ok ws=${worksiteCode} blk=${blockId} pid=${projectId.slice(0, 8)} u=${user.id.slice(0, 8)}`,
     );
@@ -125,7 +169,10 @@ export class ProgressController {
         blockId,
         visibility,
       },
-      data: slice,
+      data: {
+        ...slice,
+        imageUrls,
+      },
     };
   }
 
@@ -138,5 +185,43 @@ export class ProgressController {
       (name) => name.length > 0,
     );
     return blockNames.length > 0 ? blockNames : null;
+  }
+
+  private async loadBlockImageUrls(
+    projectName: string,
+    worksiteCode: string,
+    blockId: string,
+  ) {
+    const prefix = this.buildBlockImagePrefix(projectName, worksiteCode, blockId);
+    const keys = await this.s3.listObjectKeysByPrefix(prefix);
+
+    return Promise.all(
+      keys.map((key) => this.s3.generateDownloadPresignedUrl(key)),
+    );
+  }
+
+  private buildBlockImagePrefix(
+    projectName: string,
+    worksiteCode: string,
+    blockId: string,
+  ) {
+    return `Construction-Uploads/AdminUploads/${this.normalizeS3PathSegment(projectName)}/${this.normalizeS3PathSegment(worksiteCode)}/${this.normalizeS3PathSegment(blockId)}/`;
+  }
+
+  private normalizeS3PathSegment(value: string) {
+    const normalized = value
+      .trim()
+      .replace(/[^\w\-./]+/g, '-')
+      .replace(/\/+/g, '/')
+      .replace(/^\//, '')
+      .replace(/\/$/, '')
+      .replace(/\//g, '-')
+      .slice(0, 120);
+
+    if (!normalized) {
+      throw new BadRequestException('Invalid S3 path segment');
+    }
+
+    return normalized;
   }
 }

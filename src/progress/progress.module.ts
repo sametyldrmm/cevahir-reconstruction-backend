@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AccessModule } from '../access/access.module';
+import { S3Module } from '../common/aws/s3/s3.module';
 import { CommonJwtModule } from '../common/jwt/jwt.module';
 import { ProgressController } from './progress.controller';
 import { ProgressDataService } from './progress-data.service';
@@ -14,6 +15,7 @@ import { ProjectProgressBlock } from './entities/project-progress-block.entity';
     TypeOrmModule.forFeature([ProjectProgressBlock]),
     AccessModule,
     CommonJwtModule,
+    S3Module,
   ],
   controllers: [ProgressController],
   providers: [ProgressDataService, ProgressFilterService],

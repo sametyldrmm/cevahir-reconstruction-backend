@@ -144,6 +144,47 @@ export class S3Service {
     }
   }
 
+  async listObjectKeysByPrefix(prefix: string): Promise<string[]> {
+    const normalizedPrefix = prefix.trim();
+    if (!normalizedPrefix) {
+      return [];
+    }
+
+    const keys: string[] = [];
+    let continuationToken: string | undefined;
+
+    try {
+      do {
+        const result = await this.s3
+          .listObjectsV2({
+            Bucket: this.bucketName,
+            Prefix: normalizedPrefix,
+            ContinuationToken: continuationToken,
+          })
+          .promise();
+
+        for (const item of result.Contents ?? []) {
+          if (!item.Key || item.Key === normalizedPrefix || item.Key.endsWith('/')) {
+            continue;
+          }
+          keys.push(item.Key);
+        }
+
+        continuationToken = result.IsTruncated
+          ? result.NextContinuationToken
+          : undefined;
+      } while (continuationToken);
+
+      return keys.sort((a, b) => a.localeCompare(b, 'tr'));
+    } catch (error: any) {
+      this.logger.error(
+        `Error listing objects by prefix: ${error.message}`,
+        error.stack,
+      );
+      throw error;
+    }
+  }
+
   async createMultipartUpload(options: {
     key: string;
     contentType: string;

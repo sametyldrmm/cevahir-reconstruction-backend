@@ -31,6 +31,12 @@ const DEFAULT_SESSION_TTL_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_PART_URL_EXPIRES_SECONDS = 900;
 const DEFAULT_CLEANUP_BATCH_SIZE = 100;
 
+type ImageUploadLocation = {
+  projectName: string;
+  worksiteName: string;
+  blockName: string;
+};
+
 @Injectable()
 export class UploadsService {
   constructor(
@@ -51,11 +57,17 @@ export class UploadsService {
   ) {
     this.assertSuperAdminUser(user);
 
+    const uploadLocation = {
+      projectName: body.projectName,
+      worksiteName: body.worksiteName,
+      blockName: body.blockName,
+    };
+
     const uploads: Array<Awaited<ReturnType<UploadsService['createUploadSession']>>> =
       [];
     for (const file of body.files) {
       uploads.push(
-        await this.createUploadSession(user, file, 'images', body.projectName),
+        await this.createUploadSession(user, file, 'images', uploadLocation),
       );
     }
 
@@ -94,7 +106,7 @@ export class UploadsService {
     user: JwtUserShape,
     body: InitUploadDto | InitImageUploadItemDto,
     uploadArea: 'files' | 'images',
-    projectName?: string,
+    uploadLocation?: ImageUploadLocation,
   ) {
     const fileName = body.fileName.trim();
     if (!fileName) {
@@ -112,7 +124,7 @@ export class UploadsService {
       body.fileName,
       uploadArea,
       now,
-      projectName,
+      uploadLocation,
     );
     const bucketName = this.getBucketName();
     if (!bucketName) {
@@ -416,14 +428,25 @@ export class UploadsService {
     fileName: string,
     uploadArea: 'files' | 'images',
     now: Date,
-    projectName?: string,
+    uploadLocation?: ImageUploadLocation,
   ) {
     const exactFileName = this.normalizeObjectFileName(fileName);
     const dateSegment = this.buildDateSegment(now);
 
     if (uploadArea === 'images') {
-      const normalizedProjectName = this.normalizeProjectName(projectName);
-      return `Construction-Uploads/AdminUploads/${normalizedProjectName}/${dateSegment}/${exactFileName}`;
+      const normalizedProjectName = this.normalizeRequiredPathSegment(
+        uploadLocation?.projectName,
+        'projectName',
+      );
+      const normalizedWorksiteName = this.normalizeRequiredPathSegment(
+        uploadLocation?.worksiteName,
+        'worksiteName',
+      );
+      const normalizedBlockName = this.normalizeRequiredPathSegment(
+        uploadLocation?.blockName,
+        'blockName',
+      );
+      return `Construction-Uploads/AdminUploads/${normalizedProjectName}/${normalizedWorksiteName}/${normalizedBlockName}/${dateSegment}/${exactFileName}`;
     }
 
     const normalizedEmail = this.normalizeUploaderEmail(user.email);
@@ -520,12 +543,16 @@ export class UploadsService {
   }
 
   private normalizeProjectName(projectName?: string) {
-    const normalized = this.sanitizePathSegment(projectName ?? '').replace(
-      /\//g,
-      '-',
-    );
+    return this.normalizeRequiredPathSegment(projectName, 'projectName');
+  }
+
+  private normalizeRequiredPathSegment(
+    value: string | undefined,
+    fieldName: string,
+  ) {
+    const normalized = this.sanitizePathSegment(value ?? '').replace(/\//g, '-');
     if (!normalized) {
-      throw new BadRequestException('projectName is required');
+      throw new BadRequestException(`${fieldName} is required`);
     }
 
     return normalized;
