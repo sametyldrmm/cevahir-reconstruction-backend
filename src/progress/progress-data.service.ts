@@ -65,6 +65,20 @@ export class ProgressDataService {
     );
   }
 
+  async listDistinctDataDates(projectId: string): Promise<string[]> {
+    const rows = await this.blocks
+      .createQueryBuilder('block')
+      .select('DISTINCT block.data_date::text', 'dataDate')
+      .where('block.project_id = :projectId', { projectId })
+      .andWhere('block.data_date IS NOT NULL')
+      .orderBy('block.data_date::text', 'DESC')
+      .getRawMany<{ dataDate: string | Date }>();
+
+    return rows
+      .map((row) => this.normalizeRawDataDate(row.dataDate))
+      .filter((value): value is string => value != null);
+  }
+
   async loadDetailBlock(
     projectId: string,
     blockId: string,
@@ -422,5 +436,20 @@ export class ProgressDataService {
       ...(hasPileCount ? { pile_count } : {}),
       by_type: byType,
     };
+  }
+
+  private normalizeRawDataDate(value: string | Date | null | undefined): string | null {
+    if (value == null) {
+      return null;
+    }
+
+    if (typeof value === 'string') {
+      return normalizeProgressDataDate(value);
+    }
+
+    const year = value.getUTCFullYear();
+    const month = String(value.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(value.getUTCDate()).padStart(2, '0');
+    return normalizeProgressDataDate(`${year}-${month}-${day}`);
   }
 }

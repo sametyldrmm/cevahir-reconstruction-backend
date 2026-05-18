@@ -17,6 +17,7 @@ import { AccessPolicyService } from '../access/access-policy.service';
 import { PAGE_PERMISSIONS } from '../access/domain/permission.constants';
 import { CleanLogger } from '../common/logger';
 import { S3Service } from '../common/aws/s3/s3.service';
+import { ProgressDataDatesQueryDto } from './dto/progress-data-dates-query.dto';
 import { ProgressSummaryQueryDto } from './dto/progress-summary-query.dto';
 import { ProgressDataService } from './progress-data.service';
 import { resolveProgressDateRange } from './progress-date.utils';
@@ -34,6 +35,40 @@ export class ProgressController {
     private readonly filter: ProgressFilterService,
     private readonly s3: S3Service,
   ) {}
+
+  @Get(':worksiteCode/progress/data-dates')
+  @AuthRequired()
+  @ApiOperation({ summary: 'Projede kayitli ilerleme snapshot tarihleri' })
+  @ApiParam({ name: 'worksiteCode', example: 'WS-01' })
+  @ApiQuery({ name: 'projectId', required: true })
+  async dataDates(
+    @User() user: JwtUserShape,
+    @Param('worksiteCode') worksiteCode: string,
+    @Query() query: ProgressDataDatesQueryDto,
+  ) {
+    const { projectId } = query;
+    const { worksite, project } = await this.policy.assertWorksiteInProject(
+      user.id,
+      user.role,
+      user.organizationId,
+      projectId,
+      worksiteCode,
+    );
+    const dataDates = await this.data.listDistinctDataDates(projectId);
+    this.logger.log(
+      `progress.data-dates ok ws=${worksiteCode} pid=${projectId.slice(0, 8)} count=${dataDates.length} u=${user.id.slice(0, 8)}`,
+    );
+    return {
+      meta: {
+        projectId,
+        projectSlug: project.slug,
+        worksiteCode: worksite.code,
+      },
+      data: {
+        dataDates,
+      },
+    };
+  }
 
   @Get(':worksiteCode/progress/summary')
   @AuthRequired()
