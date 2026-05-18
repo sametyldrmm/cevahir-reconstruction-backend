@@ -48,7 +48,7 @@ export class UploadsService {
 
   async initUpload(user: JwtUserShape, body: InitUploadDto) {
     this.assertUploadUser(user);
-    return this.createUploadSession(user, body, 'files');
+    return this.createUploadSession(user, body, 'files', undefined, body.relativePath);
   }
 
   async initImageUploadsAsSuperadmin(
@@ -107,6 +107,7 @@ export class UploadsService {
     body: InitUploadDto | InitImageUploadItemDto,
     uploadArea: 'files' | 'images',
     uploadLocation?: ImageUploadLocation,
+    relativePath?: string | null,
   ) {
     const fileName = body.fileName.trim();
     if (!fileName) {
@@ -125,6 +126,7 @@ export class UploadsService {
       uploadArea,
       now,
       uploadLocation,
+      relativePath,
     );
     const bucketName = this.getBucketName();
     if (!bucketName) {
@@ -429,6 +431,7 @@ export class UploadsService {
     uploadArea: 'files' | 'images',
     now: Date,
     uploadLocation?: ImageUploadLocation,
+    relativePath?: string | null,
   ) {
     const exactFileName = this.normalizeObjectFileName(fileName);
     const dateSegment = this.buildDateSegment(now);
@@ -450,7 +453,39 @@ export class UploadsService {
     }
 
     const normalizedEmail = this.normalizeUploaderEmail(user.email);
+    const normalizedRelativePath = this.normalizeRelativeUploadPath(
+      relativePath,
+      exactFileName,
+    );
+    if (normalizedRelativePath) {
+      return `Construction-Uploads/UserUploads/${normalizedEmail}/${dateSegment}/${normalizedRelativePath}`;
+    }
+
     return `Construction-Uploads/UserUploads/${normalizedEmail}/${dateSegment}/${exactFileName}`;
+  }
+
+  private normalizeRelativeUploadPath(
+    relativePath: string | null | undefined,
+    fallbackFileName: string,
+  ): string | null {
+    const raw = relativePath?.trim();
+    if (!raw) {
+      return null;
+    }
+
+    const segments = raw
+      .replace(/\\/g, '/')
+      .split('/')
+      .map((segment) => segment.trim())
+      .filter((segment) => segment.length > 0 && segment !== '.' && segment !== '..')
+      .map((segment) => this.sanitizePathSegment(segment))
+      .filter(Boolean);
+
+    if (segments.length === 0) {
+      return this.sanitizePathSegment(fallbackFileName) || null;
+    }
+
+    return segments.join('/');
   }
 
   private calculatePartSize(fileSize: number) {

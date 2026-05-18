@@ -215,6 +215,36 @@ describe('UploadsService', () => {
     );
   });
 
+  it('stores folder uploads under UserUploads with a relative path', async () => {
+    const { service, repo, s3 } = createService({
+      AWS_S3_BUCKET_NAME: 'uploads-bucket',
+      UPLOAD_SESSION_TTL_MS: 60000,
+    });
+    s3.createMultipartUpload.mockResolvedValue({
+      uploadId: 'multipart-upload-id',
+      key:
+        'Construction-Uploads/UserUploads/upload.user@example.com/2026-05-03/Santiye/Blok-A/photo.jpg',
+    });
+
+    const result = await service.initUpload(uploadUser, {
+      fileName: 'photo.jpg',
+      fileSize: 2048,
+      contentType: 'image/jpeg',
+      relativePath: 'Santiye/Blok-A/photo.jpg',
+    });
+
+    expect(s3.createMultipartUpload).toHaveBeenCalledWith(
+      expect.objectContaining({
+        key:
+          'Construction-Uploads/UserUploads/upload.user@example.com/2026-05-03/Santiye/Blok-A/photo.jpg',
+      }),
+    );
+    expect(result.objectKey).toBe(
+      'Construction-Uploads/UserUploads/upload.user@example.com/2026-05-03/Santiye/Blok-A/photo.jpg',
+    );
+    expect(repo.save).toHaveBeenCalled();
+  });
+
   it('allows superadmin users on the standard upload flow', async () => {
     const { service, repo, s3 } = createService({
       AWS_S3_BUCKET_NAME: 'uploads-bucket',

@@ -31,4 +31,13 @@ export class InitUploadDto {
   @IsOptional()
   @IsObject()
   metadata?: Record<string, string>;
+
+  @ApiPropertyOptional({
+    example: 'Santiye-2026/Blok-A/IMG_0001.jpg',
+    description:
+      'Folder upload path relative to the date segment. Preserves subfolders under UserUploads/<email>/<date>/.',
+  })
+  @IsOptional()
+  @IsString()
+  relativePath?: string;
 }
